@@ -21,6 +21,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { format } from 'date-fns';
+import type { LiveSanctuarySession } from '@/types/sanctuary';
 
 interface SessionDetails {
   id: string;
@@ -42,7 +43,15 @@ interface SessionDetails {
   aiMonitoring: boolean;
 }
 
-export const SanctuaryAcknowledgment = () => {
+export const SanctuaryAcknowledgment = ({ 
+  session, 
+  onComplete, 
+  inviteCode 
+}: { 
+  session?: LiveSanctuarySession; 
+  onComplete?: () => void; 
+  inviteCode?: string; 
+}) => {
   const { sessionId, inviteToken } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();

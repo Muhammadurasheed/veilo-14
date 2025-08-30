@@ -36,18 +36,24 @@ interface VoiceSettings {
   useSpeakerBoost: boolean;
 }
 
-interface EnhancedLiveAudioSpaceProps {
+export interface EnhancedLiveAudioSpaceProps {
   session: LiveSanctuarySession;
-  currentUser: {
+  onSessionEnd?: () => void;
+  currentUser?: {
     id: string;
     alias: string;
     isHost?: boolean;
     isModerator?: boolean;
   };
-  onLeave: () => void;
+  onLeave?: () => void;
 }
 
-export const EnhancedLiveAudioSpace = ({ session, currentUser, onLeave }: EnhancedLiveAudioSpaceProps) => {
+export const EnhancedLiveAudioSpace = ({ 
+  session, 
+  currentUser = { id: 'anonymous', alias: 'Anonymous' }, 
+  onLeave = () => {},
+  onSessionEnd = () => {} 
+}: EnhancedLiveAudioSpaceProps) => {
   const { toast } = useToast();
   const [isMuted, setIsMuted] = useState(true);
   const [isDeafened, setIsDeafened] = useState(false);

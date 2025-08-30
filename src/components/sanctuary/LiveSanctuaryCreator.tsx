@@ -1,333 +1,446 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, Clock, Users, Lock, Globe, Eye, Mic, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  Mic, 
-  Users, 
-  Shield, 
-  Clock,
-  AlertTriangle
-} from 'lucide-react';
-import { LiveSanctuaryApi } from '@/services/api';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import axios from 'axios';
+import { format } from 'date-fns';
 
-interface LiveSanctuaryFormData {
+interface SanctuarySettings {
   topic: string;
-  description?: string;
+  description: string;
   emoji: string;
+  mode: 'public' | 'private' | 'invite-only';
   maxParticipants: number;
-  audioOnly: boolean;
+  scheduledDateTime?: string;
+  estimatedDuration: number;
+  language: string;
   allowAnonymous: boolean;
-  moderationEnabled: boolean;
-  emergencyContactEnabled: boolean;
-  expireHours: number;
+  recordingConsent: boolean;
+  aiMonitoring: boolean;
+  moderationLevel: 'low' | 'medium' | 'high' | 'strict';
+  emergencyProtocols: boolean;
+  tags: string[];
 }
 
-interface CreationState {
-  status: 'idle' | 'creating' | 'success' | 'error';
-  sessionId?: string;
-  error?: string;
-}
+const EMOJI_OPTIONS = ['💭', '🌅', '🌙', '💚', '🔮', '🎭', '🌊', '🔥', '⭐', '🌸', '🎨', '📚', '🎵', '🧘‍♀️', '💫'];
+const LANGUAGE_OPTIONS = [
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Spanish' },
+  { value: 'fr', label: 'French' },
+  { value: 'de', label: 'German' },
+  { value: 'ar', label: 'Arabic' }
+];
 
-const LiveSanctuaryCreator: React.FC = () => {
+const TAG_SUGGESTIONS = [
+  'Mental Health', 'Anxiety', 'Depression', 'Stress Relief', 'Meditation',
+  'Self Care', 'Support Group', 'Recovery', 'Mindfulness', 'Wellness',
+  'Grief Support', 'Trauma Recovery', 'Addiction Support', 'Sleep Issues',
+  'Relationships', 'Career Stress', 'Student Life', 'Parenting'
+];
+
+export const LiveSanctuaryCreator: React.FC = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isCreating, setIsCreating] = useState(false);
-  const [creationState, setCreationState] = useState<CreationState>({ status: 'idle' });
-
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<LiveSanctuaryFormData>({
-    defaultValues: {
-      topic: '',
-      description: '',
-      emoji: '🎙️',
-      maxParticipants: 50,
-      audioOnly: true,
-      allowAnonymous: true,
-      moderationEnabled: true,
-      emergencyContactEnabled: true,
-      expireHours: 1,
-    },
+  const [settings, setSettings] = useState<SanctuarySettings>({
+    topic: '',
+    description: '',
+    emoji: '💭',
+    mode: 'public',
+    maxParticipants: 10,
+    estimatedDuration: 60,
+    language: 'en',
+    allowAnonymous: true,
+    recordingConsent: false,
+    aiMonitoring: true,
+    moderationLevel: 'medium',
+    emergencyProtocols: true,
+    tags: []
   });
 
-  // EXACT PATTERN FROM WORKING ANONYMOUS SANCTUARY
-  const onSubmit = async (data: LiveSanctuaryFormData) => {
+  const [customTag, setCustomTag] = useState('');
+
+  const handleCreateSanctuary = async () => {
+    if (!settings.topic.trim()) {
+      toast.error('Please enter a topic for your sanctuary');
+      return;
+    }
+
+    if (settings.scheduledDateTime && new Date(settings.scheduledDateTime) <= new Date()) {
+      toast.error('Scheduled time must be in the future');
+      return;
+    }
+
     setIsCreating(true);
-    
     try {
-      console.log('🎙️ Creating live sanctuary session:', data);
-      
-      const response = await LiveSanctuaryApi.createSession({
-        topic: data.topic,
-        description: data.description,
-        emoji: data.emoji,
-        maxParticipants: data.maxParticipants,
-        audioOnly: data.audioOnly,
-        allowAnonymous: data.allowAnonymous,
-        moderationEnabled: data.moderationEnabled,
-        emergencyContactEnabled: data.emergencyContactEnabled,
-        expireHours: data.expireHours,
+      const response = await axios.post('/api/flagship-sanctuary/create', {
+        ...settings,
+        hostAlias: `Host_${Math.random().toString(36).substring(2, 8)}`
       });
 
-      console.log('📡 Live sanctuary creation response:', response);
-
-      // EXACT PATTERN FROM WORKING ANONYMOUS SANCTUARY
-      if (response.success && response.data) {
-        // Store host token in localStorage with expiry if this is an anonymous host
-        if (response.data.hostToken) {
-          const expiryDate = new Date();
-          expiryDate.setHours(expiryDate.getHours() + 48); // 48 hours
-          
-          localStorage.setItem(`live-sanctuary-host-${response.data.id}`, response.data.hostToken);
-          localStorage.setItem(`live-sanctuary-host-${response.data.id}-expires`, expiryDate.toISOString());
-        }
-        
-        toast({
-          title: 'Live Sanctuary Created',
-          description: `Your live audio session "${data.topic}" is now active.`,
-        });
-
-        // Navigate using the EXACT SAME PATTERN as anonymous sanctuary
-        const sessionId = response.data.id; // SAME AS WORKING ANONYMOUS SANCTUARY
-        console.log('✅ Session created successfully, navigating to:', sessionId);
-        
-        navigate(`/sanctuary/live/${sessionId}?role=host`);
-      } else {
-        console.error('❌ Invalid response structure:', {
-          success: response.success,
-          hasData: !!response.data,
-          error: response.error,
-          fullResponse: response
-        });
-        
-        throw new Error(response.error || 'Failed to create live sanctuary session');
-      }
+      const { session, hostToken, inviteLink } = response.data;
+      
+      toast.success('Sanctuary created successfully!');
+      
+      // Navigate to the session with host token
+      navigate(`/sanctuary/live/${session.id}?host=${hostToken}`);
+      
     } catch (error: any) {
-      console.error('❌ Live sanctuary creation failed:', error);
-      
-      toast({
-        title: 'Failed to create live sanctuary',
-        description: error.message || 'Please try again later.',
-        variant: 'destructive',
-      });
-      
-      setCreationState({ 
-        status: 'error', 
-        error: error.message || 'Unknown error occurred' 
-      });
+      console.error('Failed to create sanctuary:', error);
+      toast.error(error.response?.data?.message || 'Failed to create sanctuary');
     } finally {
       setIsCreating(false);
     }
   };
 
-  const watchedValues = watch();
+  const addTag = (tag: string) => {
+    if (tag && !settings.tags.includes(tag) && settings.tags.length < 5) {
+      setSettings(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag]
+      }));
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setSettings(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }));
+  };
+
+  const handleCustomTagAdd = () => {
+    if (customTag.trim()) {
+      addTag(customTag.trim());
+      setCustomTag('');
+    }
+  };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <Card className="border-purple-200 shadow-lg">
-        <CardHeader className="text-center">
-          <div className="text-6xl mb-4">🎙️</div>
-          <CardTitle className="text-2xl text-purple-700">Create Live Audio Sanctuary</CardTitle>
-          <p className="text-gray-600">
-            Start a real-time audio session for meaningful conversations and support
-          </p>
-        </CardHeader>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 p-4">
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            Create Live Sanctuary
+          </h1>
+          <p className="text-muted-foreground">Design a safe space for meaningful conversations</p>
+        </div>
 
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* Topic */}
-            <div>
-              <Label htmlFor="topic" className="text-sm font-medium">
-                Sanctuary Topic *
-              </Label>
-              <Input
-                id="topic"
-                {...register('topic', { 
-                  required: 'Topic is required',
-                  minLength: { value: 3, message: 'Topic must be at least 3 characters' }
-                })}
-                placeholder="What will you discuss? (e.g., Anxiety Support)"
-                className="mt-1"
-              />
-              {errors.topic && (
-                <p className="text-red-500 text-sm mt-1">{errors.topic.message}</p>
-              )}
-            </div>
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Main Settings */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Mic className="w-5 h-5 text-primary" />
+                  Basic Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-12 gap-4">
+                  <div className="col-span-2">
+                    <Label>Emoji</Label>
+                    <Select value={settings.emoji} onValueChange={(value) => setSettings(prev => ({ ...prev, emoji: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {EMOJI_OPTIONS.map(emoji => (
+                          <SelectItem key={emoji} value={emoji}>{emoji}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-10">
+                    <Label>Topic *</Label>
+                    <Input 
+                      placeholder="What's your sanctuary about?"
+                      value={settings.topic}
+                      onChange={(e) => setSettings(prev => ({ ...prev, topic: e.target.value }))}
+                      maxLength={100}
+                    />
+                  </div>
+                </div>
 
-            {/* Description */}
-            <div>
-              <Label htmlFor="description" className="text-sm font-medium">
-                Description (Optional)
-              </Label>
-              <Textarea
-                id="description"
-                {...register('description')}
-                placeholder="Provide more context about your sanctuary..."
-                className="mt-1"
-                rows={3}
-              />
-            </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea 
+                    placeholder="Describe what participants can expect..."
+                    value={settings.description}
+                    onChange={(e) => setSettings(prev => ({ ...prev, description: e.target.value }))}
+                    maxLength={500}
+                    className="min-h-[100px]"
+                  />
+                </div>
 
-            {/* Emoji */}
-            <div>
-              <Label htmlFor="emoji" className="text-sm font-medium">
-                Sanctuary Emoji
-              </Label>
-              <Input
-                id="emoji"
-                {...register('emoji')}
-                placeholder="🎙️"
-                className="mt-1 text-center text-2xl"
-                maxLength={2}
-              />
-            </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Language</Label>
+                    <Select value={settings.language} onValueChange={(value) => setSettings(prev => ({ ...prev, language: value }))}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGE_OPTIONS.map(lang => (
+                          <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Max Participants</Label>
+                    <Select 
+                      value={settings.maxParticipants.toString()} 
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, maxParticipants: parseInt(value) }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[5, 10, 15, 20, 30, 50].map(num => (
+                          <SelectItem key={num} value={num.toString()}>{num} people</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Settings Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Max Participants */}
-              <div>
-                <Label htmlFor="maxParticipants" className="text-sm font-medium flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Max Participants
-                </Label>
-                <Input
-                  id="maxParticipants"
-                  type="number"
-                  {...register('maxParticipants', { 
-                    required: true, 
-                    min: { value: 2, message: 'Minimum 2 participants' },
-                    max: { value: 100, message: 'Maximum 100 participants' }
-                  })}
-                  min={2}
-                  max={100}
-                  className="mt-1"
-                />
-                {errors.maxParticipants && (
-                  <p className="text-red-500 text-sm mt-1">{errors.maxParticipants.message}</p>
+            {/* Privacy & Access */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  Privacy & Access
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label>Visibility</Label>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {[
+                      { value: 'public', icon: Globe, label: 'Public' },
+                      { value: 'private', icon: Lock, label: 'Private' },
+                      { value: 'invite-only', icon: Eye, label: 'Invite Only' }
+                    ].map(option => (
+                      <button
+                        key={option.value}
+                        onClick={() => setSettings(prev => ({ ...prev, mode: option.value as any }))}
+                        className={`p-3 rounded-lg border text-sm flex flex-col items-center gap-2 transition-colors ${
+                          settings.mode === option.value 
+                            ? 'border-primary bg-primary/5 text-primary' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <option.icon className="w-4 h-4" />
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Allow Anonymous Participants</Label>
+                      <p className="text-sm text-muted-foreground">Let people join without registering</p>
+                    </div>
+                    <Switch 
+                      checked={settings.allowAnonymous}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, allowAnonymous: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>AI Monitoring</Label>
+                      <p className="text-sm text-muted-foreground">Detect and prevent harmful content</p>
+                    </div>
+                    <Switch 
+                      checked={settings.aiMonitoring}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, aiMonitoring: checked }))}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label>Emergency Protocols</Label>
+                      <p className="text-sm text-muted-foreground">Crisis detection and intervention</p>
+                    </div>
+                    <Switch 
+                      checked={settings.emergencyProtocols}
+                      onCheckedChange={(checked) => setSettings(prev => ({ ...prev, emergencyProtocols: checked }))}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Moderation Level</Label>
+                  <Select 
+                    value={settings.moderationLevel} 
+                    onValueChange={(value) => setSettings(prev => ({ ...prev, moderationLevel: value as any }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low - Basic filtering</SelectItem>
+                      <SelectItem value="medium">Medium - Balanced protection</SelectItem>
+                      <SelectItem value="high">High - Strict filtering</SelectItem>
+                      <SelectItem value="strict">Strict - Maximum protection</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Scheduling */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-primary" />
+                  Scheduling (Optional)
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Start Date & Time</Label>
+                    <Input 
+                      type="datetime-local"
+                      value={settings.scheduledDateTime || ''}
+                      onChange={(e) => setSettings(prev => ({ ...prev, scheduledDateTime: e.target.value || undefined }))}
+                      min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
+                    />
+                  </div>
+                  <div>
+                    <Label>Estimated Duration (minutes)</Label>
+                    <Select 
+                      value={settings.estimatedDuration.toString()} 
+                      onValueChange={(value) => setSettings(prev => ({ ...prev, estimatedDuration: parseInt(value) }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[30, 45, 60, 90, 120, 180].map(duration => (
+                          <SelectItem key={duration} value={duration.toString()}>{duration} minutes</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Tags */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle>Tags</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {settings.tags.map(tag => (
+                    <Badge key={tag} variant="secondary" className="cursor-pointer" onClick={() => removeTag(tag)}>
+                      {tag} ×
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input 
+                      placeholder="Add custom tag"
+                      value={customTag}
+                      onChange={(e) => setCustomTag(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleCustomTagAdd()}
+                      maxLength={20}
+                    />
+                    <Button size="sm" onClick={handleCustomTagAdd}>Add</Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-sm">Suggested:</Label>
+                  <div className="flex flex-wrap gap-1">
+                    {TAG_SUGGESTIONS.filter(tag => !settings.tags.includes(tag)).slice(0, 8).map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => addTag(tag)}
+                        className="text-xs px-2 py-1 bg-muted rounded hover:bg-primary/10 transition-colors"
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Preview */}
+            <Card className="border-primary/20">
+              <CardHeader>
+                <CardTitle>Preview</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{settings.emoji}</span>
+                  <div>
+                    <h3 className="font-semibold truncate">{settings.topic || 'Untitled Sanctuary'}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Users className="w-3 h-3" />
+                      <span>{settings.maxParticipants} max</span>
+                      <span>•</span>
+                      <Clock className="w-3 h-3" />
+                      <span>{settings.estimatedDuration}min</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {settings.description && (
+                  <p className="text-sm text-muted-foreground line-clamp-3">{settings.description}</p>
                 )}
-              </div>
-
-              {/* Duration */}
-              <div>
-                <Label htmlFor="expireHours" className="text-sm font-medium flex items-center gap-2">
-                  <Clock className="h-4 w-4" />
-                  Duration (Hours)
-                </Label>
-                <Input
-                  id="expireHours"
-                  type="number"
-                  {...register('expireHours', { 
-                    required: true,
-                    min: { value: 0.5, message: 'Minimum 30 minutes' },
-                    max: { value: 24, message: 'Maximum 24 hours' }
-                  })}
-                  min={0.5}
-                  max={24}
-                  step={0.5}
-                  className="mt-1"
-                />
-                {errors.expireHours && (
-                  <p className="text-red-500 text-sm mt-1">{errors.expireHours.message}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Settings Switches */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
+                
                 <div className="flex items-center gap-2">
-                  <Mic className="h-4 w-4 text-purple-600" />
-                  <Label htmlFor="audioOnly" className="text-sm font-medium">
-                    Audio Only Mode
-                  </Label>
+                  {settings.mode === 'public' && <Globe className="w-3 h-3 text-green-500" />}
+                  {settings.mode === 'private' && <Lock className="w-3 h-3 text-orange-500" />}
+                  {settings.mode === 'invite-only' && <Eye className="w-3 h-3 text-blue-500" />}
+                  <span className="text-xs capitalize text-muted-foreground">{settings.mode.replace('-', ' ')}</span>
                 </div>
-                <Switch
-                  id="audioOnly"
-                  {...register('audioOnly')}
-                  checked={watchedValues.audioOnly}
-                />
-              </div>
+              </CardContent>
+            </Card>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-green-600" />
-                  <Label htmlFor="allowAnonymous" className="text-sm font-medium">
-                    Allow Anonymous Participants
-                  </Label>
-                </div>
-                <Switch
-                  id="allowAnonymous"
-                  {...register('allowAnonymous')}
-                  checked={watchedValues.allowAnonymous}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-blue-600" />
-                  <Label htmlFor="moderationEnabled" className="text-sm font-medium">
-                    AI Moderation
-                  </Label>
-                </div>
-                <Switch
-                  id="moderationEnabled"
-                  {...register('moderationEnabled')}
-                  checked={watchedValues.moderationEnabled}
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                  <Label htmlFor="emergencyContactEnabled" className="text-sm font-medium">
-                    Emergency Contact System
-                  </Label>
-                </div>
-                <Switch
-                  id="emergencyContactEnabled"
-                  {...register('emergencyContactEnabled')}
-                  checked={watchedValues.emergencyContactEnabled}
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={isCreating}
-              className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3"
+            {/* Create Button */}
+            <Button 
+              onClick={handleCreateSanctuary}
+              disabled={isCreating || !settings.topic.trim()}
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+              size="lg"
             >
               {isCreating ? (
                 <>
-                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                  Creating Live Sanctuary...
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                  Creating...
                 </>
               ) : (
-                <>
-                  <Mic className="h-4 w-4 mr-2" />
-                  Create Live Audio Sanctuary
-                </>
+                'Create Sanctuary'
               )}
             </Button>
-          </form>
-
-          {/* Error State */}
-          {creationState.status === 'error' && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-700 text-sm">
-                {creationState.error}
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
-
-export default LiveSanctuaryCreator;

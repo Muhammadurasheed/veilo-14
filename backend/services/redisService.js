@@ -2,28 +2,26 @@ const Redis = require('ioredis');
 
 class RedisService {
   constructor() {
-    this.client = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD || undefined,
-      retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-    });
+    // Parse Redis URL or use individual components
+    const redisConfig = process.env.REDIS_URL 
+      ? { 
+          url: process.env.REDIS_URL,
+          retryDelayOnFailover: 100,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+        }
+      : {
+          host: process.env.REDIS_HOST || 'localhost',
+          port: process.env.REDIS_PORT || 6379,
+          password: process.env.REDIS_PASSWORD || undefined,
+          retryDelayOnFailover: 100,
+          maxRetriesPerRequest: 3,
+          lazyConnect: true,
+        };
 
-    this.publisher = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD || undefined,
-      lazyConnect: true,
-    });
-
-    this.subscriber = new Redis({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: process.env.REDIS_PORT || 6379,
-      password: process.env.REDIS_PASSWORD || undefined,
-      lazyConnect: true,
-    });
+    this.client = new Redis(redisConfig);
+    this.publisher = new Redis(redisConfig);
+    this.subscriber = new Redis(redisConfig);
 
     this.isConnected = false;
     this.setupEventHandlers();

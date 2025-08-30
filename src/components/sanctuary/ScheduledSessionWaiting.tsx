@@ -20,6 +20,7 @@ import {
   Play
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
+import type { LiveSanctuarySession } from '@/types/sanctuary';
 
 interface WaitingSessionData {
   id: string;
@@ -40,7 +41,13 @@ interface WaitingSessionData {
   }>;
 }
 
-export const ScheduledSessionWaiting = () => {
+export const ScheduledSessionWaiting = ({
+  session,
+  onSessionStart
+}: {
+  session?: LiveSanctuarySession;
+  onSessionStart?: () => void;
+}) => {
   const { sessionId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();

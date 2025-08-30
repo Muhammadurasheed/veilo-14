@@ -67,6 +67,7 @@ export interface LiveSanctuarySession {
   hostAlias: string;
   createdAt: string;
   startTime?: string;
+  scheduledDateTime?: string;
   isActive: boolean;
   status?: 'pending' | 'active' | 'ended';
   mode: 'public' | 'private' | 'invite-only';

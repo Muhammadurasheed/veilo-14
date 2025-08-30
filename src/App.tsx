@@ -32,6 +32,8 @@ import SanctuaryInboxPage from '@/pages/SanctuaryInbox';
 import { SanctuaryHostDashboard } from '@/components/sanctuary/SanctuaryHostDashboard';
 import MySanctuariesPage from '@/pages/MySanctuaries';
 import SanctuarySubmit from '@/pages/SanctuarySubmit';
+import { LiveSanctuaryFlow } from './pages/LiveSanctuaryFlow';
+import { LiveSanctuaryCreator } from './components/sanctuary/LiveSanctuaryCreator';
 import EnhancedSanctuary from '@/pages/EnhancedSanctuary';
 import EnhancedLiveSanctuary from '@/pages/EnhancedLiveSanctuary';
 import Phase4Test from '@/pages/Phase4Test';
@@ -149,7 +151,8 @@ const App: React.FC = () => {
         <Route path="/sanctuary/submit/:sessionId" element={<SanctuarySubmit />} />
         <Route path="/sanctuary/inbox/:sessionId" element={<SanctuaryInboxPage />} />
         <Route path="/sanctuary/recover/:sessionId" element={<SanctuaryRecover />} />
-        <Route path="/sanctuary/live/:sessionId" element={<EnhancedLiveSanctuary />} />
+          <Route path="/sanctuary/live/:sessionId" element={<LiveSanctuaryFlow />} />
+          <Route path="/sanctuary/creator" element={<LiveSanctuaryCreator />} />
         <Route path="/my-sanctuaries" element={
           <ProtectedRoute requireAuth={true}>
             <MySanctuariesPage />

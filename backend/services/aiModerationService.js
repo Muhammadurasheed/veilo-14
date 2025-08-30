@@ -402,4 +402,16 @@ Respond in JSON format only:
 // Singleton instance
 const aiModerationService = new AIModerationService();
 
-module.exports = aiModerationService;
+module.exports = {
+  initialize: async () => {
+    console.log('🔍 AI Moderation Service initialized');
+    return Promise.resolve();
+  },
+  moderateMessage: aiModerationService.moderateMessage.bind(aiModerationService),
+  checkEmergencyContent: aiModerationService.checkEmergencyContent.bind(aiModerationService),
+  handleEmergencyContent: aiModerationService.handleEmergencyContent.bind(aiModerationService),
+  moderateVoiceTranscript: aiModerationService.moderateVoiceTranscript.bind(aiModerationService),
+  getModerationStats: aiModerationService.getModerationStats.bind(aiModerationService),
+  updateModerationLevel: aiModerationService.updateModerationLevel.bind(aiModerationService),
+  batchModerate: aiModerationService.batchModerate.bind(aiModerationService)
+};
