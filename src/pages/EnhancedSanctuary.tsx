@@ -72,13 +72,38 @@ const EnhancedSanctuary = () => {
       } catch (error) {
         console.error('Failed to fetch session:', error);
         // Fallback to mock data for development
-        const mockSession = {
-          ...basicSessionData,
+        const mockSession: LiveSanctuarySession = {
+          id: sessionId || 'mock-session',
+          topic: 'Anonymous Support Circle',
+          description: 'A safe space for sharing and support',
+          emoji: '🌸',
+          hostId: 'mock-host-id',
+          hostAlias: 'Host',
+          participants: [],
           participantCount: 0,
+          maxParticipants: 8,
+          audioOnly: true,
+          allowAnonymous: true,
+          moderationEnabled: true,
+          emergencyContactEnabled: true,
+          status: 'active',
+          estimatedDuration: 3600,
+          tags: ['support'],
+          language: 'en',
+          moderationLevel: 'high',
           hostToken: 'temp-host-token',
           inviteLink: '',
+          createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-        } as any;
+          startTime: new Date().toISOString(),
+          agoraChannelName: `sanctuary_${sessionId}`,
+          agoraToken: 'mock-agora-token',
+          isRecorded: false,
+          recordingConsent: [],
+          breakoutRooms: [],
+          aiMonitoring: true,
+          emergencyProtocols: true
+        };
 
         setSession(mockSession);
       }
