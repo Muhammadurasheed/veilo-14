@@ -80,19 +80,27 @@ const MySanctuaries = () => {
         try {
           if (isAnonKey) {
             // Validate anonymous inbox sanctuary
-            const response = await SanctuaryApi.getSubmissions(sanctuaryId, hostToken);
-            if (response.success && response.data) {
+            const submissionsResponse = await SanctuaryApi.getSubmissions(sanctuaryId);
+            if (submissionsResponse.success && submissionsResponse.data) {
+              const submissions = submissionsResponse.data.submissions || [];
+              // Use session data from the original session object, not from submissions response
+              const sessionId = sanctuaryId;
+              const topic = localStorage.getItem(`sanctuary-topic-${sanctuaryId}`) || 'Untitled Sanctuary';
+              const description = localStorage.getItem(`sanctuary-description-${sanctuaryId}`);
+              const emoji = localStorage.getItem(`sanctuary-emoji-${sanctuaryId}`);
+              
+              const sanitizedTopic = topic || 'Sanctuary';
               storedSanctuaries.push({
                 id: sanctuaryId,
-                topic: response.data.session.topic || 'Untitled Sanctuary',
-                description: response.data.session.description,
-                emoji: response.data.session.emoji,
-                mode: response.data.session.mode || 'anon-inbox',
-                createdAt: response.data.session.createdAt,
-                expiresAt: response.data.session.expiresAt,
+                topic: sanitizedTopic,
+                description: description,
+                emoji: emoji,
+                mode: 'anon-inbox' as const,
+                createdAt: expiryTime, // Use expiry time as fallback creation date
+                expiresAt: expiryTime,
                 hostToken,
-                isActive: new Date(response.data.session.expiresAt) > now,
-                submissionCount: response.data.submissions?.length || 0,
+                isActive: new Date(expiryTime) > now,
+                submissionCount: submissions.length || 0,
                 lastAccessed: localStorage.getItem(`sanctuary-last-accessed-${sanctuaryId}`) || undefined,
               });
             }
@@ -100,7 +108,7 @@ const MySanctuaries = () => {
             // Validate live audio sanctuary
             const response = await LiveSanctuaryApi.getSession(sanctuaryId);
             if (response.success && response.data) {
-              const s = response.data.session || response.data;
+              const s = response.data; // Use response.data directly, not response.data.session
               storedSanctuaries.push({
                 id: sanctuaryId,
                 topic: s.topic || 'Live Sanctuary',

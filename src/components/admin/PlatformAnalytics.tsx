@@ -45,7 +45,7 @@ const PlatformAnalytics = () => {
   const fetchPlatformAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await AnalyticsApi.getPlatformAnalytics(timeframe);
+      const response = await AnalyticsApi.getPlatformAnalytics({ timeframe });
       if (response.success) {
         setAnalytics(response.data);
       }

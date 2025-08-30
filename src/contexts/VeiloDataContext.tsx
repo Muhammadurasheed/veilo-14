@@ -66,7 +66,8 @@ export const VeiloDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await PostApi.getPosts();
       if (response.success && response.data) {
-        setPosts(response.data);
+        const dataArray = Array.isArray(response.data) ? response.data : response.data.posts || [];
+        setPosts(dataArray);
       } else {
         console.error('Failed to fetch posts:', response.error);
         toast({
@@ -87,7 +88,8 @@ export const VeiloDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       const response = await ExpertApi.getExperts();
       if (response.success && response.data) {
-        setExperts(response.data);
+        const dataArray = Array.isArray(response.data) ? response.data : response.data.experts || [];
+        setExperts(dataArray);
       } else {
         console.error('Failed to fetch experts:', response.error);
       }
@@ -108,7 +110,7 @@ export const VeiloDataProvider = ({ children }: { children: ReactNode }) => {
         setPosts(prevPosts => 
           prevPosts.map(post => 
             post.id === postId 
-              ? { ...post, likes: response.data.likes } 
+              ? { ...post, likesCount: response.data.likesCount } 
               : post
           )
         );
@@ -134,7 +136,7 @@ export const VeiloDataProvider = ({ children }: { children: ReactNode }) => {
         setPosts(prevPosts => 
           prevPosts.map(post => 
             post.id === postId 
-              ? { ...post, likes: response.data.likes } 
+              ? { ...post, likesCount: response.data.likesCount } 
               : post
           )
         );

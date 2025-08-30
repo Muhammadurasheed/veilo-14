@@ -61,7 +61,7 @@ export function ExpertVerificationUpload({ expertId, onDocumentUploaded }: Exper
           name: file.name,
           status: 'pending',
           uploadedAt: new Date().toISOString(),
-          fileUrl: response.data.fileUrl,
+          fileUrl: response.data.document?.url || response.data.document?.fileUrl || response.data.url || 'uploaded',
         };
 
         setDocuments(prev => [...prev, newDocument]);

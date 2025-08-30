@@ -328,6 +328,18 @@ export const SanctuaryApi = {
 
   async getSubmissions(sessionId: string): Promise<ApiResponse<{ submissions: any[] }>> {
     return apiClient.get(`/api/sanctuary/${sessionId}/submissions`);
+  },
+
+  async endSession(sessionId: string): Promise<ApiResponse<void>> {
+    return apiClient.post(`/api/sanctuary/${sessionId}/end`);
+  },
+
+  async flagSession(sessionId: string, reason: string): Promise<ApiResponse<void>> {
+    return apiClient.post(`/api/sanctuary/${sessionId}/flag`, { reason });
+  },
+
+  async removeParticipant(sessionId: string, participantId: string): Promise<ApiResponse<void>> {
+    return apiClient.delete(`/api/sanctuary/${sessionId}/participants/${participantId}`);
   }
 } as const;
 
@@ -371,6 +383,10 @@ export const LiveSanctuaryApi = {
 
   async end(sessionId: string): Promise<ApiResponse<void>> {
     return apiClient.post(`/api/live-sanctuary/${sessionId}/end`);
+  },
+
+  async leaveSession(sessionId: string): Promise<ApiResponse<{ sessionEnded: boolean }>> {
+    return this.leave(sessionId);
   }
 } as const;
 
