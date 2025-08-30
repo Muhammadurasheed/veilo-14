@@ -174,7 +174,6 @@ const apiRequest = async <T = any>(
 
 // User API methods
 const UserApi = {
-  // User API register with enhanced types
   async register(userData: { 
     alias?: string; 
     avatarIndex?: number; 
@@ -730,8 +729,8 @@ const AppealApi = {
   }
 };
 
-// Export main API instances  
-export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest };
+// Export main API instances and setAdminToken
+export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest, setAdminToken };
 
 // Export type reference
 export type { ApiResponse } from '@/types';
