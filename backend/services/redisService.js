@@ -2,26 +2,43 @@ const Redis = require('ioredis');
 
 class RedisService {
   constructor() {
-    // Parse Redis URL or use individual components
-    const redisConfig = process.env.REDIS_URL 
-      ? { 
-          url: process.env.REDIS_URL,
-          retryDelayOnFailover: 100,
-          maxRetriesPerRequest: 3,
-          lazyConnect: true,
-        }
-      : {
-          host: process.env.REDIS_HOST || 'localhost',
-          port: process.env.REDIS_PORT || 6379,
-          password: process.env.REDIS_PASSWORD || undefined,
-          retryDelayOnFailover: 100,
-          maxRetriesPerRequest: 3,
-          lazyConnect: true,
-        };
+    // Enhanced Redis configuration for Redis Cloud with TLS
+    const redisConfig = {
+      host: process.env.REDIS_HOST || 'redis-13335.c93.us-east-1-3.ec2.redns.redis-cloud.com',
+      port: parseInt(process.env.REDIS_PORT) || 13335,
+      username: process.env.REDIS_USERNAME || 'default',
+      password: process.env.REDIS_PASSWORD,
+      
+      // TLS Configuration for Redis Cloud
+      tls: {
+        rejectUnauthorized: false // Redis Cloud uses self-signed certificates
+      },
+      
+      // Connection and retry settings
+      connectTimeout: 10000,
+      lazyConnect: true,
+      maxRetriesPerRequest: 5,
+      retryDelayOnFailover: 1000,
+      retryConnectOnFailover: true,
+      
+      // Retry strategy
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 200, 5000);
+        console.log(`🔄 Redis reconnection attempt ${times}, retrying in ${delay}ms`);
+        return delay;
+      },
+      
+      // Reconnect on error
+      reconnectOnError: (err) => {
+        console.log('🔄 Redis reconnectOnError:', err.message);
+        return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
+      }
+    };
 
+    // Create Redis instances with enhanced config
     this.client = new Redis(redisConfig);
-    this.publisher = new Redis(redisConfig);
-    this.subscriber = new Redis(redisConfig);
+    this.publisher = new Redis({ ...redisConfig, db: 0 });
+    this.subscriber = new Redis({ ...redisConfig, db: 0 });
 
     this.isConnected = false;
     this.setupEventHandlers();
