@@ -39,7 +39,8 @@ const SanctuarySubmit = () => {
       const response = await SanctuaryApi.getSession(sessionId);
       
       if (response.success && response.data) {
-        setSession(response.data);
+        const sessionData = response.data.session;
+        setSession(sessionData);
       } else {
         setError(response.error || 'Session not found');
       }
@@ -65,11 +66,11 @@ const SanctuarySubmit = () => {
 
     try {
       setSubmitting(true);
-      const response = await SanctuaryApi.submitMessage(
-        sessionId,
-        alias.trim() || `Anonymous ${Date.now()}`,
-        message.trim()
-      );
+      const response = await SanctuaryApi.create({
+        topic: `Message from ${alias.trim() || `Anonymous ${Date.now()}`}`,
+        description: message.trim(),
+        emoji: '💬'
+      });
       
       if (response.success) {
         setSubmitted(true);

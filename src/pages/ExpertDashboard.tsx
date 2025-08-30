@@ -31,7 +31,7 @@ const ExpertDashboard = () => {
           const response = await ExpertApi.getById(user.expertId);
           if (response.success && response.data) {
             setExpertData(response.data);
-            setExpertStatus(response.data.accountStatus || 'pending');
+            setExpertStatus((response.data as any).accountStatus || 'pending');
           }
         } catch (error) {
           console.error('Failed to load expert data:', error);

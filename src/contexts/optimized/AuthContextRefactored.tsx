@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import { tokenManager } from '@/services/tokenManager';
-import { logger } from '@/services/logger';
+import type { User } from '@/types';
 
 interface AuthUser {
   id: string;
@@ -61,10 +61,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Backend returns: { success: true, data: { user: {...} } }
       if (userData?.success === true && userData?.data?.user) {
-        setUser({
+        const updatedUser = {
           ...userData.data.user,
           role: userData.data.user.role || 'shadow'
-        } as AuthUser);
+        } as AuthUser;
+        setUser(updatedUser);
         logger.info('Authentication successful', { userId: userData.data.user.id });
         console.log('✅ AuthContext: User set successfully:', userData.data.user);
       } else {
@@ -107,7 +108,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response?.success && response?.data?.token && response?.data?.user) {
         // Tokens are automatically saved by UserApi.login
-        setUser(response.data.user);
+        const updatedUser = {
+          ...response.data.user,
+          role: response.data.user.role || 'shadow'
+        } as AuthUser;
+        setUser(updatedUser);
         
         toast({
           title: 'Welcome back!',
@@ -151,7 +156,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Check for successful registration - backend sends success: true
       if (response?.success === true && response?.data?.user && response?.data?.token) {
         // Tokens are automatically saved by UserApi.register
-        setUser(response.data.user);
+        const updatedUser = {
+          ...response.data.user,
+          role: response.data.user.role || 'shadow'
+        } as AuthUser;
+        setUser(updatedUser);
         
         toast({
           title: 'Welcome to Veilo! 🕊️',
@@ -169,8 +178,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Enhanced error handling with detailed validation errors
       let errorMessage = 'Failed to create account.';
       
-      if (response.success && response.data?.error && Array.isArray(response.data.error) && response.data.error.length > 0) {
-        errorMessage = response.data.error.map((err: any) => err.message).join(', ');
+      if (response?.error && Array.isArray(response.error) && response.error.length > 0) {
+        errorMessage = response.error.map((err: any) => err.message).join(', ');
       } else if (response?.error) {
         errorMessage = response.error;
       } else if (response?.message) {
@@ -245,10 +254,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (!user) return false;
 
     try {
-      const response = await UserApi.updateProfile(updates);
+      const response = await UserApi.updateProfile(updates as Partial<User>);
 
       if (response?.success && response?.data?.user) {
-        setUser(response.data.user);
+        const updatedUser = {
+          ...response.data.user,
+          role: response.data.user.role || 'shadow'
+        } as AuthUser;
+        setUser(updatedUser);
         
         toast({
           title: 'Profile updated',

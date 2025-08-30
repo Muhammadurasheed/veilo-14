@@ -547,12 +547,12 @@ export const GeminiApi = {
     return AIApi.moderateContent({ content });
   },
   
-  async improveContent(content: string, context?: string): Promise<ApiResponse<{ improvedContent: string }>> {
-    return AIApi.improveContent({ content, context });
+  async improveContent(content: string): Promise<ApiResponse<{ improvedContent: string }>> {
+    return AIApi.improveContent({ content });
   },
   
-  async refinePost(content: string, context?: string): Promise<ApiResponse<{ improvedContent: string }>> {
-    return this.improveContent(content, context);
+  async refinePost(content: string): Promise<ApiResponse<{ improvedContent: string }>> {
+    return this.improveContent(content);
   }
 } as const;
 

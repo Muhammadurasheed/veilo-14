@@ -30,7 +30,7 @@ const SmartSanctuaryRouter: React.FC = () => {
           if (sanctuaryResponse.success && sanctuaryResponse.data) {
             sessionData = sanctuaryResponse.data;
             // Determine type based on mode
-            sessionType = sanctuaryResponse.data?.mode === 'live-audio' ? 'live' : 'inbox';
+            sessionType = (sanctuaryResponse.data as any)?.mode === 'live-audio' ? 'live' : 'inbox';
           }
         } catch (error) {
           // If not found in sanctuary API, try live sanctuary API

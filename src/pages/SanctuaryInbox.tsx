@@ -110,10 +110,13 @@ const SanctuaryInbox = () => {
       if (showLoading) setLoading(true);
       const hostToken = getHostToken();
       
-      const response = await SanctuaryApi.getSubmissions(sessionId, hostToken || undefined);
+      const response = await SanctuaryApi.getSubmissions(sessionId);
       
-      if (response.success && response.data) {
-        setInboxData(response.data);
+      if (response.success && response.data?.submissions) {
+        setInboxData({
+          session: {} as SanctuarySession,
+          submissions: response.data.submissions
+        });
         setLastRefresh(new Date());
         setError(null);
       } else {

@@ -2,7 +2,7 @@ import { createContext, useContext, ReactNode, useState, useEffect, useCallback 
 import { UserApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/useLocalStorage';
-import { useApi } from '@/hooks/useApi';
+import type { User } from '@/types';
 
 interface AuthUser {
   id: string;
@@ -156,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       const response = await execute(
-        () => UserApi.updateProfile(updates),
+        () => UserApi.updateProfile(updates as Partial<User>),
         {
           showSuccessToast: true,
           successMessage: 'Profile updated successfully!',

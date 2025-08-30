@@ -106,8 +106,24 @@ const EnhancedLiveSanctuary: React.FC = () => {
         
         if (response.success && response.data) {
           // Access nested session data correctly
-          const sessionData = response.data.session || response.data;
-          setSession(sessionData);
+          const sessionData = response.data;
+          setSession({
+            ...sessionData,
+            hostAlias: sessionData.hostAlias || 'Host',
+            agoraChannelName: sessionData.agoraChannelName || sessionData.id,
+            agoraToken: sessionData.agoraToken || 'temp-token',
+            currentParticipants: sessionData.currentParticipants || sessionData.participantCount || 0,
+            isActive: sessionData.isActive !== undefined ? sessionData.isActive : true,
+            participants: sessionData.participants.map(p => ({
+              ...p,
+              isModerator: p.isHost || false,
+              isMuted: p.isMuted || false,
+              handRaised: false,
+              avatarIndex: 0,
+              connectionStatus: 'connected',
+              audioLevel: 0
+            }))
+          });
           
           // Determine user role from URL params
           const role = searchParams.get('role') as 'host' | 'participant' || 'participant';

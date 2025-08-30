@@ -148,21 +148,7 @@ const ExpertRegistration = () => {
         bio: values.bio,
         pricingModel: values.pricingModel,
         pricingDetails: values.pricingDetails,
-        phoneNumber: values.phoneNumber,
-        // ... keep existing code (location, education, workExperience fields) 
-        voiceMasking: values.voiceMasking,
-        // Location details
-        location: {
-          city: values.city,
-          state: values.state,
-          country: values.country,
-          timezone: values.timezone
-        },
-        // Experience and education will be added in the next step
-        workExperience: [],
-        education: [],
-        skills: skills,
-        certifications: certifications
+        phoneNumber: values.phoneNumber
       });
       
       console.log('Registration response:', response);
@@ -171,34 +157,22 @@ const ExpertRegistration = () => {
         throw new Error(response.error || 'Failed to register. Please try again.');
       }
       
-      // Import tokenManager for consistent token handling
       const { tokenManager } = await import('@/services/tokenManager');
       
-      // Save the token and user ID using tokenManager
-      if (response.data.token) {
-        tokenManager.setToken(response.data.token);
-      }
-      
-      // Set the expert ID - use the expert ID from response data
-      const newExpertId = response.data.data?.expertId || response.data.data?.id || response.data.expertId;
-      console.log('Setting expertId from response:', response.data);
-      console.log('Setting expertId:', newExpertId);
-      
-      if (!newExpertId) {
-        throw new Error('Expert ID not found in registration response');
-      }
-      
-      setExpertId(newExpertId);
+      if (response.success && response.data?.expert) {
+        const expertData = response.data.expert;
+        // API doesn't return token in this format, so skip token handling for now
+        setExpertId(expertData.id);
 
-      toast({
-        title: 'Registration submitted!',
-        description: 'Please continue with document verification.',
-      });
+        toast({
+          title: 'Registration submitted!',
+          description: 'Please continue with document verification.',
+        });
 
-      // Now we have a token, move to the next step
-      setStep('experience');
-      
-      console.log('Expert registered successfully with ID:', response.data.expertId || response.data.userId);
+        setStep('experience');
+      } else {
+        throw new Error(response.error || 'Failed to register. Please try again.');
+      }
     } catch (error) {
       console.error('Registration error:', error);
       toast({
@@ -638,7 +612,10 @@ const ExpertRegistration = () => {
                     label="Professional License/Certification" 
                     description="Upload your professional license or certification (PDF, JPG, PNG)" 
                     acceptedFileTypes=".pdf,.jpg,.jpeg,.png"
-                    onUpload={(file) => handleFileUpload(file, 'credential')}
+                    onUpload={async (file) => {
+                      const result = await handleFileUpload(file, 'credential');
+                      return; // Return void
+                    }}
                     required={true}
                   />
                   
@@ -646,7 +623,9 @@ const ExpertRegistration = () => {
                     label="Government-Issued ID" 
                     description="Upload a government-issued ID for identity verification" 
                     acceptedFileTypes=".jpg,.jpeg,.png,.pdf"
-                    onUpload={(file) => handleFileUpload(file, 'id')}
+                    onUpload={async (file) => {
+                      await handleFileUpload(file, 'id');
+                    }}
                     required={true}
                   />
                   
@@ -654,14 +633,18 @@ const ExpertRegistration = () => {
                     label="Profile Photo" 
                     description="Upload a professional headshot (JPG, PNG)" 
                     acceptedFileTypes=".jpg,.jpeg,.png"
-                    onUpload={(file) => handleFileUpload(file, 'photo')}
+                    onUpload={async (file) => {
+                      await handleFileUpload(file, 'photo');
+                    }}
                   />
                   
                   <FileUpload 
                     label="Additional Supporting Document (Optional)" 
                     description="Any additional documents that support your expertise" 
                     acceptedFileTypes=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    onUpload={(file) => handleFileUpload(file, 'other')}
+                    onUpload={async (file) => {
+                      await handleFileUpload(file, 'other');
+                    }}
                   />
                 </div>
                 
