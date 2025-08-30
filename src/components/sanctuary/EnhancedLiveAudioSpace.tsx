@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useSanctuarySocket } from '@/hooks/useSanctuarySocket';
 import { VoiceModulationPanel } from './VoiceModulationPanel';
-import api from '@/services/api';
+import { VeiloApi } from '@/services/api-mock';
 import { 
   Mic, 
   MicOff, 
@@ -27,7 +27,7 @@ import {
   Waves,
   Activity
 } from 'lucide-react';
-import type { LiveSanctuarySession, LiveParticipant } from '@/types';
+import type { SanctuarySession, LiveParticipant } from '@/types';
 
 interface VoiceSettings {
   stability: number;
@@ -37,7 +37,7 @@ interface VoiceSettings {
 }
 
 export interface EnhancedLiveAudioSpaceProps {
-  session: LiveSanctuarySession;
+  session: SanctuarySession;
   onSessionEnd?: () => void;
   currentUser?: {
     id: string;
@@ -58,7 +58,7 @@ export const EnhancedLiveAudioSpace = ({
   const [isMuted, setIsMuted] = useState(true);
   const [isDeafened, setIsDeafened] = useState(false);
   const [handRaised, setHandRaised] = useState(false);
-  const [participants, setParticipants] = useState<LiveParticipant[]>(session.participants || []);
+  const [participants, setParticipants] = useState<LiveParticipant[]>(session.participants as LiveParticipant[] || []);
   const [audioLevel, setAudioLevel] = useState(0);
   const [showVoicePanel, setShowVoicePanel] = useState(false);
   const [showParticipantsList, setShowParticipantsList] = useState(true);
@@ -348,7 +348,7 @@ export const EnhancedLiveAudioSpace = ({
     
     try {
       // Test voice modulation with sample text
-      const response = await api.post('/api/flagship-sanctuary/test-voice', {
+      const response = await VeiloApi.post('/api/flagship-sanctuary/test-voice', {
         text: "Hello, this is a test of your current voice modulation settings.",
         voiceStyle: currentVoiceStyle,
         settings: voiceSettings
@@ -425,15 +425,15 @@ export const EnhancedLiveAudioSpace = ({
               <div>
                 <h1 className="text-xl font-bold">{session.topic}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {participants.length} participants • {session.hostAlias} hosting
+                  {participants.length} participants • {session.hostAlias || 'Unknown Host'} hosting
                 </p>
               </div>
             </div>
             
             <div className="flex items-center space-x-2">
-              <Badge variant={session.status === 'active' ? 'default' : 'secondary'}>
+              <Badge variant={(session.status || 'active') === 'active' ? 'default' : 'secondary'}>
                 <Activity className="h-3 w-3 mr-1" />
-                {session.status}
+                {session.status || 'active'}
               </Badge>
               {voiceModulationEnabled && (
                 <Badge variant="outline" className="bg-primary/5">

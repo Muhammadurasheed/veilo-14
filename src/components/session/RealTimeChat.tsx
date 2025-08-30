@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useUserContext } from '@/contexts/UserContext';
-import { useChatSocket, useSocket } from '@/hooks/useSocket';
+import useSocketService from '@/hooks/useSocketService';
 import MessageBubble from '@/components/chat/MessageBubble';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import ChatInput from '@/components/chat/ChatInput';
@@ -60,11 +60,13 @@ const RealTimeChat = ({ expertId, sessionId, callType }: RealTimeChatProps) => {
   const navigate = useNavigate();
   
   // Real-time socket connection
-  const { socket, isConnected } = useSocket({ autoConnect: true });
-  const { sendMessage: sendSocketMessage, startTyping, stopTyping } = useChatSocket(
-    sessionId || expertId || '', 
-    user?.role === 'beacon' ? 'expert' : 'user'
-  );
+  const socketService = useSocketService();
+  const isConnected = socketService.isSocketConnected();
+  
+  // Mock chat functionality for now
+  const sendSocketMessage = (message: string) => {
+    console.log('Sending message:', message);
+  };
 
   // State
   const [expert, setExpert] = useState<ExpertData | null>(null);
@@ -139,20 +141,20 @@ const RealTimeChat = ({ expertId, sessionId, callType }: RealTimeChatProps) => {
 
   // Set up socket listeners
   useEffect(() => {
-    if (!socket || !isConnected) return;
+    if (!socketService || !isConnected) return;
 
     // Listen for new messages
-    socket.onNewMessage((message: Message) => {
+    socketService.on('new-message', (message: Message) => {
       setMessages(prev => [...prev, message]);
       
       // Mark as delivered if not from current user
       if (message.sender.id !== user?.id) {
-        socket.markMessageDelivered(message.id);
+        socketService?.emit('mark-delivered', message.id);
       }
     });
 
     // Listen for call invitations
-    socket.on('call-invitation', (data: { callType: 'voice' | 'video'; from: any }) => {
+    socketService?.on('call-invitation', (data: { callType: 'voice' | 'video'; from: any }) => {
       toast({
         title: `Incoming ${data.callType} call`,
         description: `${data.from.alias} is calling you`,
@@ -165,9 +167,10 @@ const RealTimeChat = ({ expertId, sessionId, callType }: RealTimeChatProps) => {
     });
 
     return () => {
-      socket.removeAllListeners();
+      socketService?.off('call-invitation');
+      socketService?.off('new-message');
     };
-  }, [socket, isConnected, user?.id, sessionId, expertId, toast]);
+  }, [socketService, isConnected, user?.id, sessionId, expertId, toast]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -219,8 +222,8 @@ const RealTimeChat = ({ expertId, sessionId, callType }: RealTimeChatProps) => {
     setIsInCall(true);
     
     // Send call invitation via socket
-    if (isConnected && socket) {
-      socket.emit('call-invitation', {
+    if (isConnected && socketService) {
+      socketService.emit('call-invitation', {
         to: expert.id,
         callType: type,
         sessionId: sessionId || expertId

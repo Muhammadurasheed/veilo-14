@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Expert } from '@/types';
-import VeiloApi from '@/services/api';
+import { VeiloApi } from '@/services/api-mock';
 import { useToast } from '@/hooks/use-toast';
 import {
   Card,
@@ -127,10 +127,7 @@ const ExpertVerificationFixed = () => {
     queryKey: ['pendingExperts'],
     queryFn: async () => {
       try {
-      const approveResult = await VeiloApi.Admin.verifyExpert(expertId, {
-        verificationLevel: 'approved',
-        status: 'approved'
-      });
+        const response = await VeiloApi.experts.getPendingExperts();
         return response.data?.experts || mockPendingExperts;
       } catch (error) {
         console.log('Using mock data due to API error:', error);
@@ -152,7 +149,7 @@ const ExpertVerificationFixed = () => {
     
     try {
       // Call the real API to verify the expert
-      const response = await VeiloApi.Admin.verifyExpert(selectedExpert.id, {
+      const response = await VeiloApi.experts.updateExpertStatus(selectedExpert.id, {
         verificationLevel: action === 'approved' ? verificationLevel : 'blue',
         status: action,
       });

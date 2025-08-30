@@ -1,5 +1,6 @@
 // Re-export enhanced Expert type - cleaned of duplicates
 export type { Expert } from './expert-final';
+export type { LiveParticipant } from './sanctuary';
 
 // User-related types
 export enum UserRole {

@@ -14,7 +14,7 @@ import type {
   Comment,
   Session,
   SanctuarySession,
-  LiveSanctuarySession,
+  SanctuarySession,
   LiveSanctuaryParticipant,
   CreateLiveSanctuaryRequest,
   ApiPostRequest,
