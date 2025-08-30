@@ -112,13 +112,14 @@ export interface ExtendedLiveSanctuarySession {
   emergencyContactEnabled?: boolean;
 }
 
+// Export backwards compatible LiveParticipant that matches sanctuary needs
 export interface LiveParticipant {
   id: string;
   alias: string;
   avatarIndex?: number;
   joinedAt: string;
   isHost: boolean;
-  isMuted: boolean;
+  isMuted: boolean; // Required for compatibility
   isModerator?: boolean;
   isBlocked?: boolean;
   audioLevel?: number;
@@ -126,6 +127,8 @@ export interface LiveParticipant {
   handRaised?: boolean;
   speakingTime?: number;
   reactions?: EmojiReaction[];
+  isAnonymous?: boolean;
+  micPermission?: 'granted' | 'denied' | 'pending';
 }
 
 export interface EmojiReaction {

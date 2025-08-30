@@ -1,6 +1,20 @@
-// Re-export enhanced Expert type - cleaned of duplicates
-export type { Expert } from './expert-final';
+// FAANG-level type system - Complete and consistent
+// Re-export complete Expert type - no duplicates
+export type { Expert } from './expert-complete';
 export type { LiveParticipant } from './sanctuary';
+
+// Import complete API types
+export type {
+  ApiSanctuaryCreateRequest,
+  ApiSanctuaryJoinRequest,
+  CreateLiveSanctuaryRequest,
+  ApiPostRequest,
+  ApiCommentRequest,
+  ApiExpertRegisterRequest,
+  ApiChatSessionRequest,
+  ApiGeminiModerateRequest,
+  ApiGeminiImproveRequest
+} from './api-complete';
 
 // User-related types
 export enum UserRole {
@@ -111,6 +125,7 @@ export interface Session {
   rating?: number;
   feedback?: string;
   notes?: string;
+  createdAt?: string; // Added missing field
 }
 
 export interface Booking {
@@ -124,125 +139,7 @@ export interface Booking {
   notes?: string;
 }
 
-// API Request types
-export interface ApiPostRequest {
-  content: string;
-  feeling?: string;
-  topic?: string;
-  wantsExpertHelp: boolean;
-  languageCode: string;
-  attachments?: PostAttachment[];
-}
-
-export interface ApiCommentRequest {
-  postId: string;
-  content: string;
-  languageCode: string;
-}
-
-export interface ApiExpertRegisterRequest {
-  name: string;
-  email: string;
-  phoneNumber?: string;
-  specialization: string;
-  bio: string;
-  headline?: string;
-  location?: {
-    city?: string;
-    state?: string;
-    country?: string;
-    timezone?: string;
-  };
-  languages?: string[];
-  pricingModel: 'free' | 'donation' | 'fixed';
-  pricingDetails?: string;
-  hourlyRate?: number;
-  skills?: string[];
-  certifications?: string[];
-  workExperience?: Array<{
-    jobTitle: string;
-    company: string;
-    startDate: string;
-    endDate?: string;
-    isCurrent: boolean;
-    description?: string;
-    skills?: string[];
-  }>;
-  education?: Array<{
-    institution: string;
-    degree: string;
-    fieldOfStudy?: string;
-    startDate?: string;
-    endDate?: string;
-    grade?: string;
-  }>;
-  availability?: Array<{
-    day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
-    timeSlots: Array<{
-      start: string;
-      end: string;
-      available: boolean;
-    }>;
-  }>;
-  sessionPreferences?: {
-    voiceMasking: boolean;
-    allowRecording: boolean;
-    sessionTypes: {
-      chat: boolean;
-      voice: boolean;
-      video: boolean;
-    };
-    minDuration: number;
-    maxDuration: number;
-  };
-  socialLinks?: {
-    linkedin?: string;
-    twitter?: string;
-    website?: string;
-    instagram?: string;
-  };
-  yearsOfExperience?: number;
-}
-
-export interface ApiChatSessionRequest {
-  recipientId: string;
-  sessionType: 'chat' | 'voice' | 'video';
-}
-
-export interface ApiSanctuaryCreateRequest {
-  topic: string;
-  description?: string;
-  emoji?: string;
-  maxParticipants?: number;
-  audioOnly: boolean;
-  allowAnonymous: boolean;
-  moderationEnabled: boolean;
-  emergencyContactEnabled: boolean;
-  expireHours: number;
-}
-
-export interface ApiSanctuaryJoinRequest {
-  participantAlias: string;
-  isAnonymous?: boolean;
-}
-
-// Live Sanctuary types
-export interface CreateLiveSanctuaryRequest {
-  title: string;
-  description?: string;
-  tags?: string[];
-  maxParticipants?: number;
-  isScheduled?: boolean;
-  scheduledDateTime?: string;
-  estimatedDuration?: number;
-  isPrivate?: boolean;
-  requireApproval?: boolean;
-  emergencyProtocols?: boolean;
-  aiMonitoring?: boolean;
-  recordingConsent?: boolean;
-  language?: string;
-}
-
+// Live Sanctuary types - Complete with all required properties
 export interface LiveSanctuarySession {
   id: string;
   title: string;
@@ -268,6 +165,7 @@ export interface LiveSanctuarySession {
   mode?: 'public' | 'private' | 'invite-only';
   startTime?: string;
   currentParticipants?: number;
+  participantCount?: number; // Added for compatibility
   isActive?: boolean;
   expiresAt?: string;
   recordingConsent?: any;
@@ -282,6 +180,7 @@ export interface LiveSanctuarySession {
 // Main Sanctuary Session type (backwards compatible)
 export interface SanctuarySession extends LiveSanctuarySession {
   // All LiveSanctuarySession properties included via extension
+  topic: string; // Make topic required for backwards compatibility
 }
 
 export interface LiveSanctuaryParticipant {
@@ -291,25 +190,6 @@ export interface LiveSanctuaryParticipant {
   isAnonymous: boolean;
   joinedAt: string;
   isMuted?: boolean;
-  micPermission?: 'granted' | 'denied' | 'pending';
-}
-
-// Export as LiveParticipant (legacy alias) - make them compatible
-export interface LiveParticipant {
-  id: string;
-  alias: string;
-  avatarIndex?: number;
-  joinedAt: string;
-  isHost: boolean;
-  isMuted?: boolean;
-  isModerator?: boolean;
-  isBlocked?: boolean;
-  audioLevel?: number;
-  connectionStatus?: 'connected' | 'connecting' | 'disconnected';
-  handRaised?: boolean;
-  speakingTime?: number;
-  reactions?: EmojiReaction[];
-  isAnonymous?: boolean;
   micPermission?: 'granted' | 'denied' | 'pending';
 }
 
@@ -331,13 +211,4 @@ export interface LiveSanctuaryInvitation {
   status: 'pending' | 'accepted' | 'declined' | 'expired';
   createdAt: string;
   expiresAt: string;
-}
-
-// Gemini API types
-export interface ApiGeminiModerateRequest {
-  content: string;
-}
-
-export interface ApiGeminiImproveRequest {
-  content: string;
 }

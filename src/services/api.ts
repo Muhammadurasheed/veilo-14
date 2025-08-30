@@ -4,7 +4,7 @@
  */
 
 // Import the new flagship systems
-import { VeiloApi } from './apiEndpoints';
+export { UnifiedApi as VeiloApi } from './api-unified';
 import { apiClient } from './apiClient';
 import { realTimeService } from './realTimeService';
 

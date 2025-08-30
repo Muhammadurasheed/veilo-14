@@ -1,5 +1,6 @@
 
-import { Post, Expert } from '@/types';
+import { Post } from '@/types';
+import { Expert, createCompleteExpert } from '@/types/expert-complete';
 
 // For development/fallback use only - will be replaced by API calls
 export const samplePosts: Post[] = [
@@ -82,7 +83,7 @@ export const samplePosts: Post[] = [
 ];
 
 export const sampleExperts: Expert[] = [
-  {
+  createCompleteExpert({
     id: 'expert-7zZgxwFk',
     userId: 'user-expert-1',
     name: 'James S',
@@ -94,7 +95,6 @@ export const sampleExperts: Expert[] = [
     pricingModel: 'donation',
     pricingDetails: '$75/hour - Professional therapy sessions with flexible payment options',
     rating: 4.8,
-    testimonials: [],
     topicsHelped: ['Anxiety', 'Depression', 'Trauma', 'Relationship Issues'],
     verified: true,
     accountStatus: 'approved',
@@ -103,11 +103,9 @@ export const sampleExperts: Expert[] = [
     completedSessions: 149,
     profileViews: 1240,
     profileViewsThisMonth: 89,
-    followersCount: 234,
-    lastUpdated: '2024-03-15T10:30:00Z',
-    createdAt: '2023-01-15T08:00:00Z'
-  },
-  {
+    followersCount: 234
+  }),
+  createCompleteExpert({
     id: 'expert-t9Im9JCJ',
     userId: 'user-expert-2',
     name: 'Sarah Johnson',
@@ -119,7 +117,6 @@ export const sampleExperts: Expert[] = [
     pricingModel: 'free',
     pricingDetails: 'Free initial consultation',
     rating: 4.6,
-    testimonials: [],
     topicsHelped: ['Life Coaching', 'Goal Setting', 'Career Development', 'Self Improvement'],
     verified: true,
     accountStatus: 'approved',
@@ -128,11 +125,9 @@ export const sampleExperts: Expert[] = [
     completedSessions: 71,
     profileViews: 890,
     profileViewsThisMonth: 45,
-    followersCount: 156,
-    lastUpdated: '2024-03-10T14:20:00Z',
-    createdAt: '2023-06-20T09:30:00Z'
-  },
-  {
+    followersCount: 156
+  }),
+  createCompleteExpert({
     id: 'expert-3',
     userId: 'user-expert-3',
     name: 'Dr. Michael Chen',
@@ -162,8 +157,6 @@ export const sampleExperts: Expert[] = [
     completedSessions: 85,
     profileViews: 567,
     profileViewsThisMonth: 67,
-    followersCount: 178,
-    lastUpdated: '2024-03-12T16:45:00Z',
-    createdAt: '2023-09-10T11:20:00Z'
-  }
+    followersCount: 178
+  })
 ];
