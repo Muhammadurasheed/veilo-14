@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Expert } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { AdminApi } from './AdminApiFixed';
+import { AdminApi } from '@/services/api';
 import {
   Card,
   CardContent,
@@ -108,7 +108,7 @@ const EnhancedExpertManagement = () => {
         ...(filters.dateTo && { dateTo: filters.dateTo.toISOString() }),
       };
 
-      const response = await AdminApi.getExpertsAdvanced(params);
+      const response = await (AdminApi as any).getExpertsAdvanced(params);
       if (!response.success) throw new Error(response.error || 'Failed to fetch experts');
       return response.data;
     },
@@ -118,7 +118,7 @@ const EnhancedExpertManagement = () => {
   // Bulk action mutation
   const bulkActionMutation = useMutation({
     mutationFn: async (params: { expertIds: string[]; action: 'approve' | 'reject' | 'suspend' | 'reactivate'; notes?: string }) => {
-      const response = await AdminApi.bulkExpertAction(params);
+      const response = await (AdminApi as any).bulkExpertAction(params);
       
       if (!response.success) throw new Error(response.error || 'Bulk action failed');
       return response;

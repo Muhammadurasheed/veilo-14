@@ -62,7 +62,7 @@ export const useAdminAuth = () => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await AdminApi.login({ email, password });
+    const response = await (AdminApi as any).login({ email, password });
       
       if (response.success && response.data?.token) {
         // Use centralized admin token setting

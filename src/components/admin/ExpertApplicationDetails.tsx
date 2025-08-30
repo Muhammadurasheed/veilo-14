@@ -192,7 +192,7 @@ export function ExpertApplicationDetails({
 
     setIsSubmitting(true);
     try {
-      const response = await AdminApi.bulkExpertAction({
+      const response = await (AdminApi as any).bulkExpertAction({
         expertIds: [expert.id],
         action: reviewAction,
         notes: reviewNotes || undefined,

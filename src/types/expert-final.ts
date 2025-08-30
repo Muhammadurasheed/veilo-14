@@ -1,5 +1,5 @@
 // Final Expert type to override all conflicts  
-interface Expert {
+export interface Expert {
   id: string;
   userId: string;
   name: string;
@@ -112,4 +112,3 @@ interface Expert {
   profileEnhancements?: any;
 }
 
-export type { Expert };

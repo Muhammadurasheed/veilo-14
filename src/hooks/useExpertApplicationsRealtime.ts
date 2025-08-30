@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useUserContext } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
-import socketService from '@/services/socket';
+import useSocketService from '@/hooks/useSocketService';
 
 interface ExpertApplication {
   id: string;
@@ -26,6 +26,7 @@ interface ExpertApplicationUpdate {
 
 export const useExpertApplicationsRealtime = () => {
   const { user } = useUserContext();
+  const socketService = useSocketService();
   const { toast } = useToast();
   const [applications, setApplications] = useState<ExpertApplication[]>([]);
   const [isConnected, setIsConnected] = useState(false);
