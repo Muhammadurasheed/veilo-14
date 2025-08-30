@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import { tokenManager } from '@/services/tokenManager';
+import { logger } from '@/services/logger';
 import type { User } from '@/types';
 
 interface AuthUser {

@@ -60,12 +60,7 @@ class AIEmotionalIntelligence {
     try {
       logger.debug('Analyzing emotional state', { userId, contentLength: content.length });
       
-      const response = await apiRequest<{
-        emotion: string;
-        intensity: number;
-        confidence: number;
-        indicators: string[];
-      }>('POST', '/api/ai/emotional-analysis', {
+      const response = await apiRequest('POST', '/api/ai/emotional-analysis', {
         content,
         userId,
         includeHistory: true
@@ -121,14 +116,7 @@ class AIEmotionalIntelligence {
         this.analyzeContextForCrisis(context)
       ]);
 
-      const response = await apiRequest<{
-        isCrisis: boolean;
-        severity: string;
-        confidence: number;
-        triggers: any[];
-        recommendations: any;
-        riskFactors: string[];
-      }>('POST', '/api/ai/crisis-detection', {
+      const response = await apiRequest('POST', '/api/ai/crisis-detection', {
         content,
         userId,
         context,
@@ -186,13 +174,7 @@ class AIEmotionalIntelligence {
     try {
       const emotionalState = await this.analyzeEmotionalState(originalMessage, conversationContext.participantId);
       
-      const response = await apiRequest<{
-        suggestedText: string;
-        tone: string;
-        reasoning: string;
-        alternatives: string[];
-        contextualCues: string[];
-      }>('POST', '/api/ai/smart-response', {
+      const response = await apiRequest('POST', '/api/ai/personalized-recommendations', {
         message: originalMessage,
         context: conversationContext,
         emotionalState,

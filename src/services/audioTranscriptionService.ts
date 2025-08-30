@@ -154,11 +154,7 @@ class AudioTranscriptionService {
       const audioBase64 = await this.blobToBase64(audioBlob);
       
       // Send to backend for transcription and analysis
-      const response = await apiRequest<{
-        transcription: string;
-        crisisAnalysis: any;
-        actionRequired: boolean;
-      }>('POST', '/api/ai/audio-transcription', {
+      const response = await apiRequest('POST', '/api/ai/transcribe', {
         audioData: audioBase64,
         sessionId: 'current-session', // TODO: Get from context
         participantId: 'current-user' // TODO: Get from context

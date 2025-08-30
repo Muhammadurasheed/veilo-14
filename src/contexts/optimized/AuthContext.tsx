@@ -2,6 +2,7 @@ import { createContext, useContext, ReactNode, useState, useEffect, useCallback 
 import { UserApi } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/useLocalStorage';
+import { useApi } from '@/hooks/useApi';
 import type { User } from '@/types';
 
 interface AuthUser {

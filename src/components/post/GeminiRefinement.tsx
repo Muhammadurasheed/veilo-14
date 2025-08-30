@@ -35,7 +35,7 @@ const GeminiRefinement: React.FC<GeminiRefinementProps> = ({
     setViolation(null);
     
     try {
-      const response = await GeminiApi.refinePost(originalContent, 'supportive');
+      const response = await GeminiApi.refinePost(originalContent);
       
       if (response.success && response.data && (response.data as any).refinedText) {
         setRefinedContent((response.data as any).refinedText);

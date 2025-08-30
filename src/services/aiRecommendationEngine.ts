@@ -28,7 +28,7 @@ class AIRecommendationEngine {
   
   async getPersonalizedRecommendations(userId: string): Promise<PersonalizedRecommendation> {
     try {
-      const response = await apiRequest<PersonalizedRecommendation>('POST', '/api/ai/recommendations', { 
+      const response = await apiRequest('POST', '/api/ai/expert-matching', { 
         userId,
         includeExperts: true,
         includeSanctuarySpaces: true,
@@ -44,7 +44,7 @@ class AIRecommendationEngine {
 
   async getSmartExpertMatching(userPost: string, userHistory: any[]): Promise<RecommendationScore[]> {
     try {
-      const response = await apiRequest<RecommendationScore[]>('POST', '/api/ai/expert-matching', {
+      const response = await apiRequest('POST', '/api/ai/smart-recommendations', {
         postContent: userPost,
         userHistory,
         sentimentAnalysis: true,
