@@ -55,6 +55,11 @@ export const AuthApi = {
     return apiClient.post('/api/auth/refresh-token', { refreshToken });
   },
 
+  // Legacy authentication method
+  async authenticate(token: string): Promise<ApiResponse<{ user: User }>> {
+    return this.verify(token);
+  },
+
   // Anonymous user creation
   async createAnonymous(): Promise<ApiResponse<{ user: User; token: string; refreshToken: string }>> {
     return apiClient.post('/api/auth/anonymous');
@@ -102,6 +107,11 @@ export const ExpertApi = {
     return apiClient.get('/api/experts', { params });
   },
 
+  // Legacy method names for compatibility
+  async getExperts(params?: any): Promise<ApiResponse<{ experts: Expert[]; pagination?: any }>> {
+    return this.getAll(params);
+  },
+
   async getById(id: string): Promise<ApiResponse<{ expert: Expert }>> {
     return apiClient.get(`/api/experts/${id}`);
   },
@@ -122,6 +132,16 @@ export const ExpertApi = {
     formData.append('documentType', documentType);
     
     return apiClient.upload(`/api/experts/${expertId}/document`, formData, onProgress);
+  },
+
+  // Legacy method names for compatibility
+  async uploadVerificationDocument(
+    expertId: string, 
+    file: File, 
+    documentType: string,
+    onProgress?: (progress: number) => void
+  ): Promise<ApiResponse<{ document: any }>> {
+    return this.uploadDocument(expertId, file, documentType, onProgress);
   },
 
   async getDocuments(expertId: string): Promise<ApiResponse<{ documents: any[] }>> {
@@ -164,6 +184,19 @@ export const PostApi = {
     return apiClient.get('/api/posts', { params });
   },
 
+  // Legacy method names for compatibility
+  async getPosts(params?: any): Promise<ApiResponse<{ posts: Post[]; pagination?: any }>> {
+    return this.getAll(params);
+  },
+
+  async createPost(postData: ApiPostRequest): Promise<ApiResponse<{ post: Post }>> {
+    return this.create(postData);
+  },
+
+  async createPostWithAttachments(postData: ApiPostRequest): Promise<ApiResponse<{ post: Post }>> {
+    return this.create(postData);
+  },
+
   async getById(id: string): Promise<ApiResponse<{ post: Post }>> {
     return apiClient.get(`/api/posts/${id}`);
   },
@@ -181,8 +214,23 @@ export const PostApi = {
     return apiClient.post(`/api/posts/${postId}/like`);
   },
 
+  // Legacy method names for compatibility
+  async likePost(postId: string): Promise<ApiResponse<{ liked: boolean; likesCount: number }>> {
+    return this.like(postId);
+  },
+
   async unlike(postId: string): Promise<ApiResponse<{ liked: boolean; likesCount: number }>> {
     return apiClient.delete(`/api/posts/${postId}/like`);
+  },
+
+  // Legacy method names for compatibility
+  async unlikePost(postId: string): Promise<ApiResponse<{ liked: boolean; likesCount: number }>> {
+    return this.unlike(postId);
+  },
+
+  // Moderation
+  async flagPost(postId: string, reason: string): Promise<ApiResponse<void>> {
+    return apiClient.post(`/api/posts/${postId}/flag`, { reason });
   },
 
   // Comments
@@ -244,7 +292,7 @@ export const SessionApi = {
  */
 export const SanctuaryApi = {
   // Basic sanctuary operations
-  async create(sanctuaryData: ApiSanctuaryCreateRequest): Promise<ApiResponse<{ session: SanctuarySession }>> {
+  async create(sanctuaryData: ApiSanctuaryCreateRequest): Promise<ApiResponse<{ session: SanctuarySession; hostToken?: string; id?: string; topic?: string; description?: string; emoji?: string }>> {
     return apiClient.post('/api/sanctuary', sanctuaryData);
   },
 
@@ -260,12 +308,26 @@ export const SanctuaryApi = {
     return apiClient.get(`/api/sanctuary/${id}`);
   },
 
+  // Legacy method names for compatibility
+  async getSession(id: string): Promise<ApiResponse<{ session: SanctuarySession }>> {
+    return this.getById(id);
+  },
+
   async join(sessionId: string, joinData: ApiSanctuaryJoinRequest): Promise<ApiResponse<{ participant: any }>> {
     return apiClient.post(`/api/sanctuary/${sessionId}/join`, joinData);
   },
 
+  // Legacy method names for compatibility
+  async joinSession(sessionId: string, joinData: ApiSanctuaryJoinRequest): Promise<ApiResponse<{ participant: any }>> {
+    return this.join(sessionId, joinData);
+  },
+
   async leave(sessionId: string): Promise<ApiResponse<void>> {
     return apiClient.post(`/api/sanctuary/${sessionId}/leave`);
+  },
+
+  async getSubmissions(sessionId: string): Promise<ApiResponse<{ submissions: any[] }>> {
+    return apiClient.get(`/api/sanctuary/${sessionId}/submissions`);
   }
 } as const;
 
@@ -274,7 +336,7 @@ export const SanctuaryApi = {
  */
 export const LiveSanctuaryApi = {
   // Live session management
-  async create(sessionData: CreateLiveSanctuaryRequest): Promise<ApiResponse<{ session: LiveSanctuarySession; hostToken: string }>> {
+  async create(sessionData: CreateLiveSanctuaryRequest): Promise<ApiResponse<{ session: LiveSanctuarySession; hostToken: string; id?: string; topic?: string; description?: string; emoji?: string }>> {
     return apiClient.post('/api/live-sanctuary', sessionData);
   },
 
@@ -296,6 +358,11 @@ export const LiveSanctuaryApi = {
     voiceModulation?: string;
   }): Promise<ApiResponse<{ session: { id: string; agoraChannelName: string; agoraToken: string; participant: LiveSanctuaryParticipant } }>> {
     return apiClient.post(`/api/live-sanctuary/${sessionId}/join`, joinData);
+  },
+
+  // Legacy method names for compatibility
+  async joinSession(sessionId: string, joinData: any): Promise<ApiResponse<{ session: any }>> {
+    return this.join(sessionId, joinData);
   },
 
   async leave(sessionId: string): Promise<ApiResponse<{ sessionEnded: boolean }>> {
@@ -440,6 +507,61 @@ export const FileApi = {
 } as const;
 
 /**
+ * Analytics API for backward compatibility
+ */
+export const AnalyticsApi = {
+  async getPlatformAnalytics(params?: { timeframe?: string }): Promise<ApiResponse<any>> {
+    return apiClient.get('/api/analytics/platform-overview', { params });
+  },
+  
+  async getExpertAnalytics(expertId: string, timeframe: string): Promise<ApiResponse<any>> {
+    return apiClient.get(`/api/analytics/expert/${expertId}`, { params: { timeframe } });
+  },
+  
+  async getExpertRankings(sortBy: string, limit: number): Promise<ApiResponse<any[]>> {
+    return apiClient.get('/api/analytics/expert-rankings', { params: { sortBy, limit } });
+  },
+} as const;
+
+/**
+ * Gemini API for AI content processing
+ */
+export const GeminiApi = {
+  async moderateContent(content: string): Promise<ApiResponse<{ isAppropriate: boolean; issues?: string[] }>> {
+    return AIApi.moderateContent({ content });
+  },
+  
+  async improveContent(content: string, context?: string): Promise<ApiResponse<{ improvedContent: string }>> {
+    return AIApi.improveContent({ content, context });
+  },
+  
+  async refinePost(content: string, context?: string): Promise<ApiResponse<{ improvedContent: string }>> {
+    return this.improveContent(content, context);
+  }
+} as const;
+
+/**
+ * Legacy API request function
+ */
+export const apiRequest = async (endpoint: string, options: any = {}) => {
+  const method = options.method || 'GET';
+  const data = options.data || options.body;
+  
+  switch (method.toUpperCase()) {
+    case 'POST':
+      return apiClient.post(endpoint, data, options);
+    case 'PUT':
+      return apiClient.put(endpoint, data, options);
+    case 'PATCH':
+      return apiClient.patch(endpoint, data, options);
+    case 'DELETE':
+      return apiClient.delete(endpoint, options);
+    default:
+      return apiClient.get(endpoint, options);
+  }
+};
+
+/**
  * Export all API endpoints
  */
 export const VeiloApi = {
@@ -454,8 +576,19 @@ export const VeiloApi = {
   Agora: AgoraApi,
   File: FileApi,
   
+  // Legacy compatibility
+  Analytics: AnalyticsApi,
+  Gemini: GeminiApi,
+  
   // Direct access to the API client for custom requests
-  client: apiClient
+  client: apiClient,
+  
+  // Legacy methods
+  get: apiClient.get.bind(apiClient),
+  post: apiClient.post.bind(apiClient),
+  put: apiClient.put.bind(apiClient),
+  patch: apiClient.patch.bind(apiClient),
+  delete: apiClient.delete.bind(apiClient)
 } as const;
 
 export default VeiloApi;

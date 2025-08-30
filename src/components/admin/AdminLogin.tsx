@@ -59,8 +59,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         success: response.success, 
         hasData: !!response.data,
         hasToken: !!response.data?.token,
-        userRole: response.data?.user?.role,
-        adminRole: response.data?.admin?.role
+        userRole: response.data?.user?.role
       });
 
       console.log('🔍 RAW ADMIN RESPONSE DEBUG:', JSON.stringify(response, null, 2));
@@ -78,7 +77,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         console.log('✅ Token found in response, proceeding with admin validation...');
         
         // Extract admin user data from response.data
-        const adminUser = response.data?.admin || response.data?.user;
+        const adminUser = response.data?.user;
         
         if (!adminUser || adminUser.role !== 'admin') {
           console.error('❌ Admin validation failed:', {

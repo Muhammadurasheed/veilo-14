@@ -93,28 +93,37 @@ const BeaconRegistration = () => {
     console.log('Submitting expert registration with values:', values);
 
     try {
-      // Step 1: Register the expert account (creates new user)
-      const registerResponse = await VeiloApi.Auth.register(values);
+      // Step 1: Register as expert user (modified for Expert data)
+      const registerResponse = await VeiloApi.Expert.register({
+        name: values.name,
+        email: values.email,
+        specialization: values.specialization,
+        bio: values.bio,
+        pricingModel: values.pricingModel,
+        pricingDetails: values.pricingDetails || '',
+        phoneNumber: values.phoneNumber || ''
+      });
       console.log('Expert account registration response:', registerResponse);
       
       if (!registerResponse.success || !registerResponse.data) {
         throw new Error(registerResponse.error || 'Failed to register expert account');
       }
       
-      // Save the user ID and token
-      const { userId, token, user: userData } = registerResponse.data;
-      setUserId(userId);
+      // Save the expert data
+      const { expert } = registerResponse.data;
+      setUserId(expert?.id);
       
-      // Set the token in localStorage
-      localStorage.setItem('veilo-token', token);
+      // Create auth token (simplified for demo)
+      const demoToken = `expert_${expert?.id}_${Date.now()}`;
+      localStorage.setItem('veilo-token', demoToken);
       
       // Update the user context
-      if (userData) {
+      if (expert) {
         setUser({
-          ...userData,
+          ...expert,
           loggedIn: true,
           isAnonymous: false
-        });
+        } as any);
       }
       
       toast({

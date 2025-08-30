@@ -23,6 +23,9 @@ export const SanctuaryApi = VeiloApi.Sanctuary;
 export const LiveSanctuaryApi = VeiloApi.LiveSanctuary;
 export const AIApi = VeiloApi.AI;
 export const AgoraApi = VeiloApi.Agora;
+export const AnalyticsApi = VeiloApi.Analytics;
+export const GeminiApi = VeiloApi.Gemini;
+export const apiRequest = VeiloApi.client.request.bind(VeiloApi.client);
 
 // Legacy socket service export
 export const SocketService = realTimeService;

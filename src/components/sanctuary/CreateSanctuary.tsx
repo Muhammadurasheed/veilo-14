@@ -118,29 +118,31 @@ const CreateSanctuary: React.FC = () => {
         
         const response = await SanctuaryApi.create(sanctuaryData);
         
-        if (response.success && response.data) {
-          // Store host token in localStorage with expiry if this is an anonymous host
-          if (response.data.hostToken) {
+        if (response.data && response.data.session) {
+          // Handle successful sanctuary creation
+          const sessionData = response.data.session;
+          const hostToken = response.data.hostToken;
+          
+          if (hostToken) {
             const expiryDate = new Date();
-            expiryDate.setHours(expiryDate.getHours() + 48); // 48 hours
+            expiryDate.setHours(expiryDate.getHours() + 48);
             
-            localStorage.setItem(`sanctuary-host-${response.data.id}`, response.data.hostToken);
-            localStorage.setItem(`sanctuary-host-${response.data.id}-expires`, expiryDate.toISOString());
+            localStorage.setItem(`sanctuary-host-${sessionData.id}`, hostToken);
+            localStorage.setItem(`sanctuary-host-${sessionData.id}-expires`, expiryDate.toISOString());
             
-            // Add to sanctuary management list
             addSanctuaryToList({
-              id: response.data.id,
-              topic: response.data.topic,
-              description: response.data.description,
-              emoji: response.data.emoji,
+              id: sessionData.id,
+              topic: sessionData.topic,
+              description: sessionData.description,
+              emoji: sessionData.emoji,
               mode: 'anon-inbox',
-              hostToken: response.data.hostToken,
+              hostToken: hostToken,
               createdAt: new Date().toISOString(),
               expiresAt: expiryDate.toISOString()
             });
           }
           
-          setCreatedSession(response.data);
+          setCreatedSession(sessionData);
           setShowShareOptions(true);
           
           toast({
@@ -163,30 +165,32 @@ const CreateSanctuary: React.FC = () => {
         
         const response = await LiveSanctuaryApi.create(liveSanctuaryData);
         
-        if (response.success && response.data) {
-          // Store host token for anonymous hosts with expiry
-          if (response.data.hostToken) {
+        if (response.data && response.data.session) {
+          // Handle successful live sanctuary creation
+          const sessionData = response.data.session;
+          const hostToken = response.data.hostToken;
+          
+          if (hostToken) {
             const expiryDate = new Date();
-            expiryDate.setHours(expiryDate.getHours() + 48); // 48 hours
+            expiryDate.setHours(expiryDate.getHours() + 48);
             
-            localStorage.setItem(`live-sanctuary-host-${response.data.id}`, response.data.hostToken);
-            localStorage.setItem(`live-sanctuary-host-${response.data.id}-expires`, expiryDate.toISOString());
+            localStorage.setItem(`live-sanctuary-host-${sessionData.id}`, hostToken);
+            localStorage.setItem(`live-sanctuary-host-${sessionData.id}-expires`, expiryDate.toISOString());
             
-            // Add to sanctuary management list
             addSanctuaryToList({
-              id: response.data.id,
-              topic: response.data.topic,
-              description: response.data.description,
-              emoji: response.data.emoji,
+              id: sessionData.id,
+              topic: sessionData.topic,
+              description: sessionData.description,
+              emoji: sessionData.emoji,
               mode: 'live-audio',
-              hostToken: response.data.hostToken,
+              hostToken: hostToken,
               createdAt: new Date().toISOString(),
               expiresAt: expiryDate.toISOString()
             });
           }
           
           setCreatedSession({
-            ...response.data.session,
+            ...sessionData,
             type: 'live-audio'
           });
           setShowShareOptions(true);
