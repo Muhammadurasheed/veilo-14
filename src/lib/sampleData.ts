@@ -106,7 +106,7 @@ export const sampleExperts: Expert[] = [
     followersCount: 234,
     lastUpdated: '2024-03-15T10:30:00Z',
     createdAt: '2023-01-15T08:00:00Z'
-  } as Expert,
+  },
   {
     id: 'expert-t9Im9JCJ',
     userId: 'user-expert-2',
@@ -131,5 +131,39 @@ export const sampleExperts: Expert[] = [
     followersCount: 156,
     lastUpdated: '2024-03-10T14:20:00Z',
     createdAt: '2023-06-20T09:30:00Z'
-  } as Expert
+  },
+  {
+    id: 'expert-3',
+    userId: 'user-expert-3',
+    name: 'Dr. Michael Chen',
+    email: 'michael@veilo.com',
+    avatarUrl: '/experts/expert-3.jpg',
+    specialization: 'Relationship Counseling',
+    verificationLevel: 'blue',
+    bio: 'Marriage and family therapist helping couples and families improve communication.',
+    pricingModel: 'donation',
+    pricingDetails: 'Sliding scale based on need',
+    rating: 4.7,
+    testimonials: [
+      {
+        id: 'test-1',
+        text: 'Dr. Chen helped us through a difficult time in our marriage.',
+        user: {
+          alias: 'GratefulCouple',
+          avatarIndex: 2
+        }
+      }
+    ],
+    topicsHelped: ['Relationships', 'Family Issues', 'Communication'],
+    verified: true,
+    accountStatus: 'approved',
+    totalRatings: 34,
+    totalSessions: 89,
+    completedSessions: 85,
+    profileViews: 567,
+    profileViewsThisMonth: 67,
+    followersCount: 178,
+    lastUpdated: '2024-03-12T16:45:00Z',
+    createdAt: '2023-09-10T11:20:00Z'
+  }
 ];

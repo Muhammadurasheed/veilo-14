@@ -18,6 +18,7 @@ export interface User {
   expertId?: string;
   avatarUrl?: string;
   email?: string;
+  name?: string;
 }
 
 // Export enum for external use

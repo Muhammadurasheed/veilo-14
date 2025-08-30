@@ -21,11 +21,10 @@ export interface CreateLiveSanctuaryRequest {
 export interface AIModerationLog {
   id: string;
   sessionId: string;
-  content: string;
+  type: 'warning' | 'intervention' | 'escalation';
   severity: 'low' | 'medium' | 'high' | 'critical';
-  action: 'none' | 'warning' | 'mute' | 'kick' | 'ban';
+  message: string;
   timestamp: string;
-  moderatorId?: string;
   resolved: boolean;
 }
 
@@ -137,5 +136,5 @@ export interface EmojiReaction {
   duration?: number;
 }
 
-// Re-export LiveSanctuarySession from types/index.ts for compatibility
+// Re-export LiveSanctuarySession for compatibility
 export { LiveSanctuarySession } from '@/types/index';

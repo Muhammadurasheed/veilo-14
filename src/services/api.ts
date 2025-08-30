@@ -131,7 +131,7 @@ api.interceptors.response.use(
 // }
 
 // Token management utilities
-export const setAdminToken = (token: string) => {
+const setAdminToken = (token: string) => {
   localStorage.setItem('admin_token', token);
   localStorage.setItem('token', token); 
   localStorage.setItem('veilo-auth-token', token);
@@ -245,6 +245,11 @@ const UserApi = {
   async updateProfile(updates: any) {
     logger.userAction('Profile update', updates);
     const response = await api.put('/api/auth/profile', updates);
+    return response.data;
+  },
+
+  async refreshIdentity() {
+    const response = await api.post('/api/auth/refresh-identity');
     return response.data;
   },
 
@@ -732,8 +737,8 @@ const AppealApi = {
   }
 };
 
-// Export main API instances and setAdminToken
-export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest };
+// Export main API instances and missing exports
+export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest, setAdminToken };
 
 // Export type reference
 export type { ApiResponse } from '@/types';

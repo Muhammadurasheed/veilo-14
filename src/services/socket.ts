@@ -28,37 +28,48 @@ export class SocketService {
         
         this.socket = io(serverUrl, {
           auth: {
-            token: authToken
+            token: authToken,
           },
-          autoConnect: true,
-          reconnection: true,
-          reconnectionAttempts: 5,
-          reconnectionDelay: 1000,
+          transports: ['websocket'],
+          timeout: 10000,
         });
 
         this.socket.on('connect', () => {
-          console.log('Socket connected:', this.socket?.id);
+          console.log('🔌 Socket connected successfully');
           this.isConnected = true;
           resolve();
         });
 
+        this.socket.on('disconnect', (reason) => {
+          console.log('🔌 Socket disconnected:', reason);
+          this.isConnected = false;
+        });
+
         this.socket.on('connect_error', (error) => {
-          console.error('Socket connection error:', error);
+          console.error('🔌 Socket connection error:', error);
           this.isConnected = false;
           reject(error);
         });
 
-        this.socket.on('disconnect', (reason) => {
-          console.log('Socket disconnected:', reason);
-          this.isConnected = false;
+        // Auto-reconnect logic
+        this.socket.on('reconnect', (attemptNumber) => {
+          console.log('🔌 Socket reconnected after', attemptNumber, 'attempts');
         });
 
-        this.socket.on('reconnect', () => {
-          console.log('Socket reconnected');
-          this.isConnected = true;
+        this.socket.on('reconnect_attempt', (attemptNumber) => {
+          console.log('🔌 Socket reconnection attempt', attemptNumber);
+        });
+
+        this.socket.on('reconnect_error', (error) => {
+          console.error('🔌 Socket reconnection error:', error);
+        });
+
+        this.socket.on('reconnect_failed', () => {
+          console.error('🔌 Socket reconnection failed');
         });
 
       } catch (error) {
+        console.error('🔌 Failed to initialize socket:', error);
         reject(error);
       }
     });
@@ -72,84 +83,91 @@ export class SocketService {
       this.socket = null;
       this.isConnected = false;
       this.connectionPromise = null;
+      console.log('🔌 Socket disconnected manually');
     }
   }
 
-  isSocketConnected(): boolean {
-    return this.isConnected && this.socket?.connected === true;
+  get connected(): boolean {
+    return this.isConnected;
   }
 
   // Chat functionality
-  joinChat(sessionId: string, userType: 'user' | 'expert'): void {
+  joinRoom(roomId: string): void {
     if (!this.socket) return;
     
-    this.socket.emit('join_chat', { sessionId, userType });
+    this.socket.emit('join_room', { roomId });
   }
 
-  leaveChat(sessionId: string): void {
+  leaveRoom(roomId: string): void {
     if (!this.socket) return;
     
-    this.socket.emit('leave_chat', { sessionId });
+    this.socket.emit('leave_room', { roomId });
   }
 
-  sendMessage(sessionId: string, content: string, type: 'text' | 'image' | 'voice' = 'text', attachment?: any, isExpert = false): void {
+  sendMessage(roomId: string, content: string, userAlias: string): void {
     if (!this.socket) return;
     
     this.socket.emit('send_message', {
-      sessionId,
+      roomId,
       content,
-      type,
-      attachment,
-      isExpert
+      userAlias,
     });
-  }
-
-  startTyping(sessionId: string): void {
-    if (!this.socket) return;
-    
-    this.socket.emit('typing_start', { sessionId });
-  }
-
-  stopTyping(sessionId: string): void {
-    if (!this.socket) return;
-    
-    this.socket.emit('typing_stop', { sessionId });
-  }
-
-  markMessageDelivered(messageId: string, sessionId: string): void {
-    if (!this.socket) return;
-    
-    this.socket.emit('message_delivered', { messageId, sessionId });
-  }
-
-  markMessageRead(messageId: string, sessionId: string): void {
-    if (!this.socket) return;
-    
-    this.socket.emit('message_read', { messageId, sessionId });
   }
 
   // Sanctuary functionality
-  joinSanctuary(sanctuaryId: string, participant: { alias?: string; isAnonymous?: boolean }): void {
+  joinSanctuaryRoom(sessionId: string, participantAlias: string): void {
     if (!this.socket) return;
     
-    this.socket.emit('join_sanctuary', { sanctuaryId, participant });
+    this.socket.emit('sanctuary_join', {
+      sessionId,
+      participantAlias,
+    });
   }
 
-  leaveSanctuary(sanctuaryId: string): void {
+  leaveSanctuaryRoom(sessionId: string): void {
     if (!this.socket) return;
     
-    this.socket.emit('leave_sanctuary', { sanctuaryId });
+    this.socket.emit('sanctuary_leave', { sessionId });
   }
 
-  sendSanctuaryMessage(sanctuaryId: string, content: string, participantAlias: string, type: 'text' | 'emoji-reaction' = 'text'): void {
+  sendSanctuaryMessage(sessionId: string, participantId: string, participantAlias: string, content: string, type: string = 'text'): void {
     if (!this.socket) return;
     
     this.socket.emit('sanctuary_message', {
-      sanctuaryId,
+      sessionId,
+      participantId,
+      participantAlias,
       content,
+      type
+    });
+  }
+
+  sendSanctuaryReaction(sessionId: string, participantId: string, participantAlias: string, type: string): void {
+    if (!this.socket) return;
+    
+    this.socket.emit('sanctuary_reaction', {
+      sessionId,
+      participantId,
       participantAlias,
       type
     });
+  }
+
+  // Generic socket methods for hooks compatibility
+  on(event: string, callback: (...args: any[]) => void): void {
+    this.socket?.on(event, callback);
+  }
+
+  emit(event: string, ...args: any[]): void {
+    this.socket?.emit(event, ...args);
+  }
+
+  off(event: string, callback?: (...args: any[]) => void): void {
+    if (callback) {
+      this.socket?.off(event, callback);
+    } else {
+      this.socket?.off(event);
+    }
   }
 
   // Voice chat functionality
@@ -198,52 +216,42 @@ export class SocketService {
     this.socket?.on('participant_left', callback);
   }
 
-  onVoiceChatRequest(callback: (request: any) => void): void {
-    this.socket?.on('voice_chat_request', callback);
+  onReactionReceived(callback: (reaction: any) => void): void {
+    this.socket?.on('reaction_received', callback);
   }
 
-  onVoiceChatResponse(callback: (response: any) => void): void {
+  onSessionStatusUpdate(callback: (data: any) => void): void {
+    this.socket?.on('session_status_update', callback);
+  }
+
+  onVoiceChatRequested(callback: (data: any) => void): void {
+    this.socket?.on('voice_chat_requested', callback);
+  }
+
+  onVoiceChatResponse(callback: (data: any) => void): void {
     this.socket?.on('voice_chat_response', callback);
   }
 
-  // General socket methods for notifications
-  emit(event: string, data?: any): void {
-    if (!this.socket) return;
-    this.socket.emit(event, data);
+  // Admin-specific events
+  onExpertApplicationUpdate(callback: (data: any) => void): void {
+    this.socket?.on('expert_application_update', callback);
   }
 
-  on(event: string, callback: (...args: any[]) => void): void {
-    if (!this.socket) return;
-    this.socket.on(event, callback);
+  onSystemAlert(callback: (alert: any) => void): void {
+    this.socket?.on('system_alert', callback);
   }
 
-  off(event: string, callback?: (...args: any[]) => void): void {
-    if (!this.socket) return;
-    if (callback) {
-      this.socket.off(event, callback);
-    } else {
-      this.socket.off(event);
-    }
+  onModerationAlert(callback: (alert: any) => void): void {
+    this.socket?.on('moderation_alert', callback);
   }
 
-  // Remove event listeners
+  // Cleanup method
   removeAllListeners(): void {
     this.socket?.removeAllListeners();
-  }
-
-  removeListener(event: string, callback?: (...args: any[]) => void): void {
-    if (callback) {
-      this.socket?.off(event, callback);
-    } else {
-      this.socket?.off(event);
-    }
   }
 }
 
 // Create singleton instance
 const socketService = new SocketService();
 
-// Export both the class and instance for compatibility
-export { SocketService };
-export type { SocketService as SocketServiceType };
 export default socketService;
