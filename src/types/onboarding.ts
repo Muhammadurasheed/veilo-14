@@ -8,6 +8,13 @@ export interface UserRegistrationData {
   preferredAlias?: string;
 }
 
+export interface RegisterRequest {
+  email?: string;
+  password?: string;
+  alias?: string;
+  realName?: string;
+}
+
 export interface UserCreationState {
   step: number;
   progress: number;

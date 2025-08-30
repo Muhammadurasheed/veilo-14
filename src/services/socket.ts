@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
-class SocketService {
+export class SocketService {
   private socket: Socket | null = null;
   private isConnected = false;
   private connectionPromise: Promise<void> | null = null;

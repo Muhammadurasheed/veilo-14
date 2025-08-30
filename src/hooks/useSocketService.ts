@@ -1,7 +1,7 @@
 // Universal socket service hook
-import socketService from '@/services/socket';
+import socketService, { type SocketService } from '@/services/socket';
 
-export const useSocketService = () => {
+export const useSocketService = (): SocketService => {
   return socketService;
 };
 

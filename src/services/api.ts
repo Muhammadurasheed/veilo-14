@@ -618,15 +618,11 @@ const SanctuaryApi = {
     return apiRequest('POST', `/api/sanctuary/sessions/${sessionId}/submit`, { alias, message });
   },
 
-  async getSubmissions(sessionId: string, hostToken?: string) {
-    const headers: Record<string, string> = {};
-    if (hostToken) {
-      headers['x-host-token'] = hostToken;
-    }
-    return apiRequest('GET', `/api/sanctuary/sessions/${sessionId}/submissions`, null, { 
-      headers,
-      params: hostToken ? { hostToken } : {}
-    });
+  async getSubmissions(sessionId?: string, params?: any) {
+    const endpoint = sessionId 
+      ? `/api/sanctuary/sessions/${sessionId}/submissions`
+      : '/api/sanctuary/submissions';
+    return apiRequest('GET', endpoint, null, { params });
   }
 };
 

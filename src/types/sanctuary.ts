@@ -1,5 +1,23 @@
 // Sanctuary-specific types
 
+export interface CreateLiveSanctuaryRequest {
+  topic: string;
+  title?: string;
+  description?: string;
+  emoji?: string;
+  maxParticipants?: number;
+  audioOnly?: boolean;
+  allowAnonymous?: boolean;
+  moderationEnabled?: boolean;
+  emergencyContactEnabled?: boolean;
+  expireHours?: number;
+  scheduledDateTime?: string;
+  estimatedDuration?: number;
+  tags?: string[];
+  language?: string;
+  moderationLevel?: string;
+}
+
 export interface AIModerationLog {
   id: string;
   sessionId: string;
