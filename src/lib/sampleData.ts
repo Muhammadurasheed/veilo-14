@@ -106,7 +106,7 @@ export const sampleExperts: Expert[] = [
     followersCount: 234,
     lastUpdated: '2024-03-15T10:30:00Z',
     createdAt: '2023-01-15T08:00:00Z'
-  },
+  } as Expert,
   {
     id: 'expert-t9Im9JCJ',
     userId: 'user-expert-2',
@@ -131,5 +131,5 @@ export const sampleExperts: Expert[] = [
     followersCount: 156,
     lastUpdated: '2024-03-10T14:20:00Z',
     createdAt: '2023-06-20T09:30:00Z'
-  }
+  } as Expert
 ];

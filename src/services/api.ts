@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { logger } from './logger';
 import { tokenManager } from './tokenManager';
-import type { ApiResponse, AdminApiType } from '@/types';
+import type { ApiResponse } from '@/types';
 
 // API Configuration - Use proxy in development, direct URL in production
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'http://localhost:3000');
@@ -166,8 +166,6 @@ const apiRequest = async <T = any>(
     return {
       success: false,
       error: response?.error || response?.message || error.message || 'An error occurred',
-      errors: response?.errors || [],
-      message: response?.message,
     };
   }
 };
@@ -250,9 +248,18 @@ const UserApi = {
     return response.data;
   },
 
-  // Refresh identity
-  async refreshIdentity() {
-    const response = await api.post('/api/auth/refresh-identity');
+  // Anonymous account creation
+  async createAnonymousUser() {
+    const response = await api.post('/api/auth/anonymous');
+    
+    if (response.data?.success && response.data?.data?.token) {
+      tokenManager.setToken(response.data.data.token);
+      if (response.data.data.refreshToken) {
+        tokenManager.setRefreshToken(response.data.data.refreshToken);
+      }
+      logger.userAction('Anonymous user created - token saved');
+    }
+    
     return response.data;
   },
 
@@ -471,7 +478,7 @@ const AdminApi = {
   async updateExpertStatus(expertId: string, status: string) {
     return apiRequest('PATCH', `/api/admin/experts/${expertId}/status`, { status });
   }
-} satisfies AdminApiType;
+} satisfies any;
 
 // Post API methods
 const PostApi = {
@@ -726,7 +733,7 @@ const AppealApi = {
 };
 
 // Export main API instances and setAdminToken
-export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest, setAdminToken };
+export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest };
 
 // Export type reference
 export type { ApiResponse } from '@/types';

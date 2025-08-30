@@ -231,8 +231,8 @@ const EnhancedExpertProfile = ({ expert, onBookSession, onSendMessage }: Enhance
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {Object.entries(expert.resumeData.skills).map(([category, skills]) => {
-                      if (!skills || skills.length === 0) return null;
+                    {Object.entries((expert.resumeData as any)?.skills || {}).map(([category, skills]) => {
+                      if (!skills || (skills as any[]).length === 0) return null;
                       return (
                         <div key={category}>
                           <h4 className="font-medium text-sm text-muted-foreground mb-2 uppercase">
@@ -241,7 +241,7 @@ const EnhancedExpertProfile = ({ expert, onBookSession, onSendMessage }: Enhance
                              category.charAt(0).toUpperCase() + category.slice(1)}
                           </h4>
                           <div className="flex flex-wrap gap-2">
-                            {skills.map((skill, index) => (
+                            {(skills as any[]).map((skill, index) => (
                               <Badge key={index} variant="outline" className="text-sm">
                                 {skill}
                               </Badge>

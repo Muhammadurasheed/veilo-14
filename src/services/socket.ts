@@ -243,4 +243,7 @@ export class SocketService {
 // Create singleton instance
 const socketService = new SocketService();
 
+// Export both the class and instance for compatibility
+export { SocketService };
+export type { SocketService as SocketServiceType };
 export default socketService;
