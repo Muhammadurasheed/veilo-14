@@ -136,9 +136,9 @@ const SanctuaryInbox = () => {
       }
       
       // Load messages/submissions
-      const messagesResponse = await SanctuaryApi.getSubmissions(sanctuaryId, hostToken);
-      if (messagesResponse.success) {
-        const formattedMessages = messagesResponse.data.map((submission: any) => ({
+      const messagesResponse = await SanctuaryApi.getSubmissions(sanctuaryId);
+      if (messagesResponse.success && messagesResponse.data?.submissions) {
+        const formattedMessages = messagesResponse.data.submissions.map((submission: any) => ({
           id: submission.id,
           alias: submission.alias,
           message: submission.message,

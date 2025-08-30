@@ -98,14 +98,14 @@ const SanctuarySpace: React.FC<SanctuarySpaceProps> = ({ isHost = false }) => {
       try {
         const response = await SanctuaryApi.getSession(sessionId);
         
-        if (response.success && response.data) {
-          setSession(response.data);
+        if (response.success && response.data?.session) {
+          setSession(response.data.session);
           
           // Set session mode based on audioOnly flag (default to text if not specified)
           setSessionMode((response.data as any)?.audioOnly ? 'audio' : 'text');
           
           // Calculate time left
-          const expiresAt = new Date(response.data.expiresAt).getTime();
+          const expiresAt = new Date(response.data.session?.expiresAt || new Date()).getTime();
           const now = new Date().getTime();
           const timeLeftMs = Math.max(0, expiresAt - now);
           setTimeLeft(Math.floor(timeLeftMs / 1000));
@@ -220,28 +220,28 @@ const SanctuarySpace: React.FC<SanctuarySpaceProps> = ({ isHost = false }) => {
       
       if (response.success && response.data) {
         setParticipant({
-          id: response.data.participantId,
-          alias: response.data.participantAlias,
+          id: response.data.participant.id,
+          alias: response.data.participant.alias,
         });
         
         // Save to localStorage
         localStorage.setItem(
           `sanctuary-participant-${sessionId}`,
           JSON.stringify({
-            id: response.data.participantId,
-            alias: response.data.participantAlias,
+            id: response.data.participant.id,
+            alias: response.data.participant.alias,
           })
         );
         
         // Add system message
-        addSystemMessage(`${response.data.participantAlias} joined the sanctuary`);
+        addSystemMessage(`${response.data.participant.alias} joined the sanctuary`);
         
         // Update participants list
         setParticipants(prev => [
           ...prev,
           {
-            id: response.data.participantId,
-            alias: response.data.participantAlias,
+            id: response.data.participant.id,
+            alias: response.data.participant.alias,
           }
         ]);
         
@@ -263,7 +263,7 @@ const SanctuarySpace: React.FC<SanctuarySpaceProps> = ({ isHost = false }) => {
     if (!sessionId || !isHost) return;
     
     try {
-      const response = await SanctuaryApi.endSession(sessionId, hostToken || undefined);
+      const response = await SanctuaryApi.endSession(sessionId);
       
       if (response.success) {
         toast({
@@ -359,8 +359,7 @@ const SanctuarySpace: React.FC<SanctuarySpaceProps> = ({ isHost = false }) => {
     try {
       const response = await SanctuaryApi.removeParticipant(
         sessionId,
-        participantId,
-        hostToken
+        participantId
       );
       
       if (response.success) {

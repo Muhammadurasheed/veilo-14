@@ -61,7 +61,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Backend returns: { success: true, data: { user: {...} } }
       if (userData?.success === true && userData?.data?.user) {
-        setUser(userData.data.user);
+        setUser({
+          ...userData.data.user,
+          role: userData.data.user.role || 'shadow'
+        } as AuthUser);
         logger.info('Authentication successful', { userId: userData.data.user.id });
         console.log('✅ AuthContext: User set successfully:', userData.data.user);
       } else {
@@ -166,8 +169,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Enhanced error handling with detailed validation errors
       let errorMessage = 'Failed to create account.';
       
-      if (response?.errors && Array.isArray(response.errors) && response.errors.length > 0) {
-        errorMessage = response.errors.map((err: any) => err.message).join(', ');
+      if (response.success && response.data?.error && Array.isArray(response.data.error) && response.data.error.length > 0) {
+        errorMessage = response.data.error.map((err: any) => err.message).join(', ');
       } else if (response?.error) {
         errorMessage = response.error;
       } else if (response?.message) {

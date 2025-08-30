@@ -149,7 +149,7 @@ const ExpertRegistration = () => {
         pricingModel: values.pricingModel,
         pricingDetails: values.pricingDetails,
         phoneNumber: values.phoneNumber,
-        timezone: values.timezone, 
+        // ... keep existing code (location, education, workExperience fields) 
         voiceMasking: values.voiceMasking,
         // Location details
         location: {

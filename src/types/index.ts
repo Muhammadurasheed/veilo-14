@@ -119,7 +119,7 @@ export interface SanctuarySession {
   participantCount: number;
   isActive: boolean;
   allowAnonymous?: boolean;
-  hostId?: string;
+  mode?: 'public' | 'private' | 'invite-only';
 }
 
 export interface SanctuaryParticipant {

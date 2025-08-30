@@ -50,7 +50,7 @@ const EnhancedBeaconsList = () => {
     try {
       const res = await ExpertApi.getExperts();
       if (res.success && res.data) {
-        setExperts(res.data as Expert[]);
+        setExperts(res.data?.experts || []);
       } else {
         toast({ title: 'Failed to load experts', description: res.error || 'Unexpected error', variant: 'destructive' });
       }

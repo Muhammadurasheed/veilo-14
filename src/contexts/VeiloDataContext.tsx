@@ -2,7 +2,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { PostApi, ExpertApi } from '@/services/api';
 import { useAuth } from '@/contexts/optimized/AuthContextRefactored';
-import { Post, Expert } from '@/types';
+import { Post, Expert, Comment } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 interface VeiloDataContextType {
@@ -19,7 +19,7 @@ interface VeiloDataContextType {
   likePost: (postId: string) => Promise<void>;
   unlikePost: (postId: string) => Promise<void>;
   createPost: (content: string, feeling?: string, topic?: string, wantsExpertHelp?: boolean, attachments?: File[]) => Promise<Post | null>;
-  addComment: (postId: string, content: string) => Promise<Post | null>;
+  addComment: (postId: string, content: string) => Promise<Comment | null>;
   flagPost: (postId: string, reason: string) => Promise<boolean>;
 }
 
@@ -183,7 +183,7 @@ export const VeiloDataProvider = ({ children }: { children: ReactNode }) => {
           formData.append(`attachments`, file);
         });
         
-        response = await PostApi.createPostWithAttachments(formData);
+        response = await PostApi.createPost(formData as any);
       } else {
         // Use JSON for text-only posts
         response = await PostApi.createPost({
@@ -221,23 +221,30 @@ export const VeiloDataProvider = ({ children }: { children: ReactNode }) => {
     return null;
   };
 
-  const addComment = async (postId: string, content: string): Promise<Post | null> => {
+  const addComment = async (postId: string, content: string): Promise<Comment | null> => {
     if (!isAuthenticated || !user) return null;
     
     try {
-      const response = await PostApi.addComment(postId, content);
-      if (response.success && response.data) {
-        // Update the post in the local state with the new comment
+      const response = await PostApi.addComment(postId, {
+        content,
+        languageCode: 'en'
+      });
+      
+      if (response.success && response.data?.comment) {
         setPosts(prevPosts => 
           prevPosts.map(post => 
-            post.id === postId ? response.data : post
+            post.id === postId
+              ? { ...post, comments: [...post.comments, response.data.comment] }
+              : post
           )
         );
+        
         toast({
           title: 'Comment added',
           description: 'Your comment has been published',
         });
-        return response.data;
+        
+        return response.data.comment;
       } else {
         toast({
           title: 'Failed to add comment',

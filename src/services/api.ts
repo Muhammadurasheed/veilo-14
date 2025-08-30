@@ -28,7 +28,7 @@ export const GeminiApi = VeiloApi.Gemini;
 export const apiRequest = VeiloApi.client.request.bind(VeiloApi.client);
 
 // Legacy socket service export
-export const SocketService = realTimeService;
+export const SessionApi = VeiloApi.Session;
 
 // Legacy admin token function
 export const setAdminToken = (token: string) => {
