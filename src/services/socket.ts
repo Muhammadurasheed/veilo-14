@@ -91,6 +91,11 @@ export class SocketService {
     return this.isConnected;
   }
 
+  // Alias for backwards compatibility
+  get isSocketConnected(): boolean {
+    return this.isConnected;
+  }
+
   // Chat functionality
   joinRoom(roomId: string): void {
     if (!this.socket) return;
@@ -98,10 +103,20 @@ export class SocketService {
     this.socket.emit('join_room', { roomId });
   }
 
+  // Alias for backwards compatibility
+  joinChat(roomId: string): void {
+    this.joinRoom(roomId);
+  }
+
   leaveRoom(roomId: string): void {
     if (!this.socket) return;
     
     this.socket.emit('leave_room', { roomId });
+  }
+
+  // Alias for backwards compatibility  
+  leaveChat(roomId: string): void {
+    this.leaveRoom(roomId);
   }
 
   sendMessage(roomId: string, content: string, userAlias: string): void {
@@ -114,6 +129,23 @@ export class SocketService {
     });
   }
 
+  // Typing indicators
+  startTyping(roomId: string): void {
+    if (!this.socket) return;
+    this.socket.emit('start_typing', { roomId });
+  }
+
+  stopTyping(roomId: string): void {
+    if (!this.socket) return;
+    this.socket.emit('stop_typing', { roomId });
+  }
+
+  // Message delivery
+  markMessageDelivered(messageId: string): void {
+    if (!this.socket) return;
+    this.socket.emit('message_delivered', { messageId });
+  }
+
   // Sanctuary functionality
   joinSanctuaryRoom(sessionId: string, participantAlias: string): void {
     if (!this.socket) return;
@@ -124,10 +156,20 @@ export class SocketService {
     });
   }
 
+  // Alias for backwards compatibility
+  joinSanctuary(sessionId: string, participantAlias?: string): void {
+    this.joinSanctuaryRoom(sessionId, participantAlias || '');
+  }
+
   leaveSanctuaryRoom(sessionId: string): void {
     if (!this.socket) return;
     
     this.socket.emit('sanctuary_leave', { sessionId });
+  }
+
+  // Alias for backwards compatibility
+  leaveSanctuary(sessionId: string): void {
+    this.leaveSanctuaryRoom(sessionId);
   }
 
   sendSanctuaryMessage(sessionId: string, participantId: string, participantAlias: string, content: string, type: string = 'text'): void {

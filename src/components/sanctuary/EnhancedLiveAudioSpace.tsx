@@ -27,7 +27,7 @@ import {
   Waves,
   Activity
 } from 'lucide-react';
-import type { LiveSanctuarySession, LiveParticipant } from '@/types/sanctuary';
+import type { LiveSanctuarySession, LiveParticipant } from '@/types';
 
 interface VoiceSettings {
   stability: number;

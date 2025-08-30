@@ -4,7 +4,7 @@ export type { Expert } from './expert-final';
 // User-related types
 export enum UserRole {
   SHADOW = "shadow",
-  BEACON = "beacon",
+  BEACON = "beacon", 
   ADMIN = "admin"
 }
 
@@ -58,121 +58,7 @@ export interface Comment {
   languageCode: string;
 }
 
-// Re-export Expert interface from expert-final.ts to fix all imports
-export interface Expert {
-  id: string;
-  userId: string;
-  name: string;
-  email: string;
-  avatarUrl?: string;
-  phoneNumber?: string;
-  specialization: string;
-  bio: string;
-  headline?: string;
-  location?: {
-    city?: string;
-    state?: string;
-    country?: string;
-    timezone?: string;
-  };
-  languages?: string[];
-  verificationLevel: 'blue' | 'gold' | 'platinum' | 'none';
-  verified: boolean;
-  pricingModel: 'free' | 'donation' | 'fixed';
-  pricingDetails?: string;
-  hourlyRate?: number;
-  rating: number;
-  totalRatings?: number;
-  totalSessions: number;
-  completedSessions: number;
-  responseTime?: string;
-  isOnline?: boolean;
-  lastActive?: string;
-  createdAt: string;
-  testimonials?: Array<{
-    id: string;
-    text: string;
-    user: {
-      alias: string;
-      avatarIndex: number;
-    };
-  }>;
-  topicsHelped?: string[];
-  skills?: string[];
-  certifications?: string[];
-  workExperience?: Array<{
-    id: string;
-    jobTitle: string;
-    company: string;
-    startDate: string;
-    endDate?: string;
-    isCurrent: boolean;
-    description?: string;
-    skills?: string[];
-  }>;
-  education?: Array<{
-    id: string;
-    institution: string;
-    degree: string;
-    fieldOfStudy?: string;
-    startDate?: string;
-    endDate?: string;
-    grade?: string;
-  }>;
-  availability?: Array<{
-    day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
-    timeSlots: Array<{
-      start: string;
-      end: string;
-      available: boolean;
-    }>;
-  }>;
-  sessionPreferences?: {
-    voiceMasking: boolean;
-    allowRecording: boolean;
-    sessionTypes: {
-      chat: boolean;
-      voice: boolean;
-      video: boolean;
-    };
-    minDuration: number;
-    maxDuration: number;
-  };
-  verificationDocuments?: Array<{
-    id: string;
-    type: 'id' | 'credential' | 'certificate' | 'other' | 'photo' | 'resume' | 'cv';
-    fileName: string;
-    fileUrl: string;
-    uploadedAt: string;
-    status: 'pending' | 'approved' | 'rejected';
-  }>;
-  accountStatus: 'pending' | 'approved' | 'rejected' | 'suspended';
-  adminNotes?: Array<{
-    id: string;
-    note: string;
-    category: string;
-    date: string;
-    adminId: string;
-    action: string;
-  }>;
-  profileViews: number;
-  profileViewsThisMonth: number;
-  lastUpdated: string;
-  followers?: string[];
-  followersCount: number;
-  socialLinks?: {
-    linkedin?: string;
-    twitter?: string;
-    website?: string;
-    instagram?: string;
-  };
-  achievements?: string[];
-  yearsOfExperience?: number;
-  resumeData?: any;
-  profileEnhancements?: any;
-}
-
-// Re-export sanctuary types to avoid import issues
+// Sanctuary types  
 export interface SanctuaryMessage {
   id: string;
   participantId: string;
@@ -181,8 +67,6 @@ export interface SanctuaryMessage {
   timestamp: string;
   type: "text" | "system" | "emoji-reaction";
 }
-
-// User-related types
 
 export interface AdminNote {
   id: string;
@@ -246,15 +130,6 @@ export interface SanctuaryParticipant {
   isHost?: boolean;
 }
 
-export interface SanctuaryMessage {
-  id: string;
-  participantId: string;
-  participantAlias: string;
-  content: string;
-  timestamp: string;
-  type: "text" | "system" | "emoji-reaction";
-}
-
 // API request types
 export interface ApiPostRequest {
   content: string;
@@ -312,7 +187,6 @@ export interface ApiResponse<T> {
   data?: T;
   error?: string;
   message?: string;
-  errors?: Array<{ field: string; message: string; value?: any }>;
 }
 
 // Gemini API request types
@@ -334,47 +208,6 @@ export interface PostFormData {
   feeling?: string;
   topic?: string;
   wantsExpertHelp?: boolean;
-}
-
-// Admin API type definitions
-export interface AdminApiType {
-  login: (credentials: { email: string; password: string }) => Promise<ApiResponse<any>>;
-  getUsers: (params?: any) => Promise<ApiResponse<any>>;
-  getExperts: (params?: any) => Promise<ApiResponse<any>>;
-  getExpertsAdvanced: (params: {
-    page?: number;
-    limit?: number;
-    status?: string;
-    verificationLevel?: string;
-    search?: string;
-    sortBy?: string;
-    sortOrder?: string;
-    dateFrom?: string;
-    dateTo?: string;
-  }) => Promise<ApiResponse<any>>;
-  bulkExpertAction: (data: {
-    expertIds: string[];
-    action: 'approve' | 'reject' | 'suspend' | 'reactivate';
-    notes?: string;
-  }) => Promise<ApiResponse<any>>;
-  getPlatformOverview: (params?: { timeframe?: string }) => Promise<ApiResponse<any>>;
-  getPendingExperts: () => Promise<ApiResponse<any>>;
-  verifyExpert: (expertId: string, data: ApiVerificationRequest) => Promise<ApiResponse<{ success: boolean }>>;
-  approveExpert: (expertId: string) => Promise<ApiResponse<any>>;
-  rejectExpert: (expertId: string, reason: string) => Promise<ApiResponse<any>>;
-  moderateContent: (contentId: string, action: string) => Promise<ApiResponse<any>>;
-  getAnalytics: (params?: any) => Promise<ApiResponse<any>>;
-  getModerationQueue: (params?: { priority?: string; type?: string }) => Promise<ApiResponse<any>>;
-  getCrisisDetection: () => Promise<ApiResponse<any>>;
-  getSanctuaryMonitoring: () => Promise<ApiResponse<any>>;
-  getExpertPerformance: () => Promise<ApiResponse<any>>;
-  getExpertApplications: () => Promise<ApiResponse<any>>;
-  getFlaggedContent: () => Promise<ApiResponse<any>>;
-  resolveFlag: (contentId: string, action: "approve" | "remove") => Promise<ApiResponse<any>>;
-  getAllExperts: () => Promise<ApiResponse<any>>;
-  getGlobalMetrics: () => Promise<ApiResponse<any>>;
-  getRecentActivity: () => Promise<ApiResponse<any>>;
-  updateExpertStatus: (expertId: string, status: string) => Promise<ApiResponse<any>>;
 }
 
 // Live Sanctuary types
@@ -402,7 +235,7 @@ export interface LiveSanctuarySession {
   description?: string;
   emoji?: string;
   hostId: string;
-  hostAlias: string;
+  hostAlias?: string;
   participants: LiveSanctuaryParticipant[];
   participantCount: number;
   maxParticipants: number;
@@ -422,6 +255,19 @@ export interface LiveSanctuarySession {
   inviteLink: string;
   createdAt: string;
   updatedAt: string;
+  // Additional properties for backwards compatibility
+  mode?: 'public' | 'private' | 'invite-only';
+  startTime?: string;
+  currentParticipants?: number;
+  isActive?: boolean;
+  expiresAt?: string;
+  recordingConsent?: any;
+  agoraChannelName?: string;
+  agoraToken?: string;
+  breakoutRooms?: any[];
+  isRecorded?: boolean;
+  aiMonitoring?: boolean;
+  emergencyProtocols?: boolean;
 }
 
 export interface LiveSanctuaryParticipant {
@@ -432,6 +278,33 @@ export interface LiveSanctuaryParticipant {
   joinedAt: string;
   isMuted?: boolean;
   micPermission?: 'granted' | 'denied' | 'pending';
+}
+
+// Export as LiveParticipant (legacy alias) - make them compatible
+export interface LiveParticipant {
+  id: string;
+  alias: string;
+  avatarIndex?: number;
+  joinedAt: string;
+  isHost: boolean;
+  isMuted?: boolean;
+  isModerator?: boolean;
+  isBlocked?: boolean;
+  audioLevel?: number;
+  connectionStatus?: 'connected' | 'connecting' | 'disconnected';
+  handRaised?: boolean;
+  speakingTime?: number;
+  reactions?: EmojiReaction[];
+  isAnonymous?: boolean;
+  micPermission?: 'granted' | 'denied' | 'pending';
+}
+
+export interface EmojiReaction {
+  id: string;
+  emoji: string;
+  participantId: string;
+  timestamp: string;
+  duration?: number;
 }
 
 export interface LiveSanctuaryInvitation {

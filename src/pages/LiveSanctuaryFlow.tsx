@@ -6,7 +6,7 @@ import { EnhancedLiveAudioSpace } from '@/components/sanctuary/EnhancedLiveAudio
 import { useSocket } from '@/hooks/useSocket';
 import { toast } from 'sonner';
 import axios from 'axios';
-import type { LiveSanctuarySession } from '@/types/sanctuary';
+import type { LiveSanctuarySession } from '@/types';
 
 export const LiveSanctuaryFlow: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();

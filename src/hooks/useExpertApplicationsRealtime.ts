@@ -39,12 +39,12 @@ export const useExpertApplicationsRealtime = () => {
     const initializeRealtime = async () => {
       try {
         // Ensure socket connection
-        if (!socketService.isSocketConnected()) {
+        if (!socketService.isSocketConnected) {
           console.log('🔌 Connecting to socket for expert applications...');
           await socketService.connect();
         }
 
-        setIsConnected(socketService.isSocketConnected());
+        setIsConnected(socketService.isSocketConnected);
 
         if (user.role === 'admin' && !hasJoinedRef.current) {
           console.log('🎯 Admin joining expert applications channel...');

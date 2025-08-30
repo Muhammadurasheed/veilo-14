@@ -108,7 +108,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         
         // Force socket service to reconnect with new admin token
         const socketService = (await import('@/services/socket')).default;
-        if (socketService.isSocketConnected()) {
+        if (socketService.isSocketConnected) {
           socketService.disconnect();
         }
         setTimeout(() => {

@@ -147,7 +147,7 @@ const RealTimeChat = ({ expertId, sessionId, callType }: RealTimeChatProps) => {
       
       // Mark as delivered if not from current user
       if (message.sender.id !== user?.id) {
-        socket.markMessageDelivered(message.id, sessionId || expertId || '');
+        socket.markMessageDelivered(message.id);
       }
     });
 

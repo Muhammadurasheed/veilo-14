@@ -76,10 +76,10 @@ export const useRealTimeNotifications = () => {
           role: user.role,
           email: user.email,
           alias: user.alias,
-          socketConnected: socket.isSocketConnected()
+          socketConnected: socket.isSocketConnected
         });
         
-        if (socket.isSocketConnected()) {
+        if (socket.isSocketConnected) {
           socket.emit('join_admin_panel', { 
             userId: user.id, 
             role: user.role,

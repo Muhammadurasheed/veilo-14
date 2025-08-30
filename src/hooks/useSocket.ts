@@ -17,7 +17,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
   const isConnecting = useRef(false);
 
   const connect = useCallback(async () => {
-    if (isConnecting.current || socketService.isSocketConnected()) {
+    if (isConnecting.current || socketService.isSocketConnected) {
       return;
     }
 
@@ -56,7 +56,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
   }, [onDisconnect]);
 
   useEffect(() => {
-    if (autoConnect && user?.loggedIn && !socketService.isSocketConnected()) {
+    if (autoConnect && user?.loggedIn && !socketService.isSocketConnected) {
       connect();
     }
 
@@ -68,7 +68,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
   return {
     connect,
     disconnect,
-    isConnected: socketService.isSocketConnected(),
+    isConnected: socketService.isSocketConnected,
     socket: socketService
   };
 };
@@ -79,8 +79,8 @@ export const useChatSocket = (sessionId: string, userType: 'user' | 'expert' = '
   const hasJoined = useRef(false);
 
   useEffect(() => {
-    if (socket.isSocketConnected() && sessionId && !hasJoined.current) {
-      socket.joinChat(sessionId, userType);
+    if (socket.isSocketConnected && sessionId && !hasJoined.current) {
+      socket.joinChat(sessionId);
       hasJoined.current = true;
     }
 
@@ -93,8 +93,9 @@ export const useChatSocket = (sessionId: string, userType: 'user' | 'expert' = '
   }, [socket, sessionId, userType]);
 
   const sendMessage = useCallback((content: string, type: 'text' | 'image' | 'voice' = 'text', attachment?: any) => {
-    socket.sendMessage(sessionId, content, type, attachment, userType === 'expert');
-  }, [socket, sessionId, userType]);
+    const { user } = useUserContext();
+    socket.sendMessage(sessionId, content, user?.alias || 'Anonymous');
+  }, [socket, sessionId]);
 
   const startTyping = useCallback(() => {
     socket.startTyping(sessionId);
@@ -108,7 +109,7 @@ export const useChatSocket = (sessionId: string, userType: 'user' | 'expert' = '
     sendMessage,
     startTyping,
     stopTyping,
-    isConnected: socket.isSocketConnected()
+    isConnected: socket.isSocketConnected
   };
 };
 
@@ -118,8 +119,8 @@ export const useSanctuarySocket = (sanctuaryId: string, participant: { alias?: s
   const hasJoined = useRef(false);
 
   useEffect(() => {
-    if (socket.isSocketConnected() && sanctuaryId && !hasJoined.current) {
-      socket.joinSanctuary(sanctuaryId, participant);
+    if (socket.isSocketConnected && sanctuaryId && !hasJoined.current) {
+      socket.joinSanctuary(sanctuaryId, participant.alias || 'Anonymous');
       hasJoined.current = true;
     }
 
@@ -137,6 +138,6 @@ export const useSanctuarySocket = (sanctuaryId: string, participant: { alias?: s
 
   return {
     sendMessage,
-    isConnected: socket.isSocketConnected()
+    isConnected: socket.isSocketConnected
   };
 };

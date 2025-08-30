@@ -453,38 +453,12 @@ const SanctuarySpace: React.FC<SanctuarySpaceProps> = ({ isHost = false }) => {
       <div className="w-full min-h-screen bg-gradient-to-br from-primary/10 to-secondary/10">
         <LiveAudioRoom 
           session={{
-            id: session.id,
-            topic: session.topic,
-            description: session.description,
-            emoji: session.emoji,
-            hostId: 'host-id', // Temporary for now
-            hostAlias: 'Host',
-            hostToken: undefined,
-            agoraChannelName: session.agoraChannelName || `sanctuary-${session.id}`,
-            agoraToken: session.agoraToken || 'temp-token',
-            expiresAt: session.expiresAt,
-            isActive: true,
-            mode: 'public',
-            participants: [],
-            maxParticipants: 50,
-            currentParticipants: 0,
-            allowAnonymous: true,
-            audioOnly: true,
-            moderationEnabled: true,
-            emergencyContactEnabled: true,
-            createdAt: new Date().toISOString(),
-            startTime: new Date().toISOString(),
-            isRecorded: false,
-            recordingConsent: false,
-            breakoutRooms: [],
-            moderationLevel: 'medium',
-            emergencyProtocols: true,
-            aiMonitoring: true,
-            estimatedDuration: undefined,
-            tags: [],
-            language: 'en',
-            status: 'active'
-          }}
+            ...session,
+            participantCount: 0,
+            inviteLink: '',
+            updatedAt: new Date().toISOString(),
+            hostToken: 'temp-host-token',
+          } as any}
           participant={{
             id: participant.id,
             alias: participant.alias,

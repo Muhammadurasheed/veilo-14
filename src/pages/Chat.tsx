@@ -126,7 +126,7 @@ const ChatPage = () => {
       
       // Mark message as delivered
       if (message.sender.id !== user?.id) {
-        socket.markMessageDelivered(message.id, sessionId || '');
+        socket.markMessageDelivered(message.id);
       }
     });
 

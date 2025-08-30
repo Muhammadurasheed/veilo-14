@@ -21,7 +21,7 @@ import {
   MapPin
 } from 'lucide-react';
 import { format } from 'date-fns';
-import type { LiveSanctuarySession } from '@/types/sanctuary';
+import type { LiveSanctuarySession } from '@/types';
 
 interface SessionDetails {
   id: string;

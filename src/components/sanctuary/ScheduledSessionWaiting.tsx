@@ -20,7 +20,7 @@ import {
   Play
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
-import type { LiveSanctuarySession } from '@/types/sanctuary';
+import type { LiveSanctuarySession } from '@/types';
 
 interface WaitingSessionData {
   id: string;

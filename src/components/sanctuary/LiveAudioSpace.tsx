@@ -19,7 +19,7 @@ import {
   AlertTriangle,
   Shield
 } from 'lucide-react';
-import type { LiveSanctuarySession, LiveParticipant } from '@/types/sanctuary';
+import type { LiveSanctuarySession, LiveParticipant } from '@/types';
 
 interface LiveAudioSpaceProps {
   session: LiveSanctuarySession;

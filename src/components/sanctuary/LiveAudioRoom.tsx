@@ -33,7 +33,7 @@ import {
   UserX,
   MessageSquare
 } from 'lucide-react';
-import { LiveSanctuarySession, LiveParticipant, EmojiReaction } from '@/types/sanctuary';
+import { LiveSanctuarySession, LiveParticipant, EmojiReaction } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface LiveAudioRoomProps {

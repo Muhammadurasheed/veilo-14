@@ -136,5 +136,5 @@ export interface EmojiReaction {
   duration?: number;
 }
 
-// Re-export LiveSanctuarySession for compatibility
-export { LiveSanctuarySession } from '@/types/index';
+// Remove the conflicting export since LiveSanctuarySession is defined in index.ts
+// export { LiveSanctuarySession } from '@/types/index';

@@ -20,7 +20,7 @@ import {
   Clock,
   Activity
 } from 'lucide-react';
-import { LiveSanctuarySession, LiveParticipant } from '@/types/sanctuary';
+import { LiveSanctuarySession, LiveParticipant } from '@/types';
 import { LiveSanctuaryApi } from '@/services/api';
 import { SEOHead } from '@/components/seo/SEOHead';
 
@@ -72,38 +72,13 @@ const EnhancedSanctuary = () => {
       } catch (error) {
         console.error('Failed to fetch session:', error);
         // Fallback to mock data for development
-        const mockSession: LiveSanctuarySession = {
-          id: sessionId || 'sanctuary-1',
-      topic: 'Anxiety & Stress Support Circle',
-      description: 'A safe space for sharing and supporting each other through anxiety and stress',
-      emoji: '🏛️',
-      hostId: 'host-1',
-      hostAlias: 'Sanctuary Guide',
-      status: 'active',
-      mode: 'public',
-      participants: [],
-      maxParticipants: 20,
-      currentParticipants: 2,
-      startTime: new Date().toISOString(),
-      estimatedDuration: 3600,
-      tags: ['anxiety', 'stress', 'support'],
-      language: 'en',
-      isRecorded: false,
-      recordingConsent: false,
-      agoraChannelName: `sanctuary_${sessionId}`,
-      agoraToken: 'mock-agora-token',
-      breakoutRooms: [],
-      moderationLevel: 'high',
-      emergencyProtocols: true,
-      aiMonitoring: true,
-      expiresAt: new Date(Date.now() + 3600000).toISOString(),
-      isActive: true,
-      allowAnonymous: true,
-      audioOnly: true,
-      moderationEnabled: true,
-      emergencyContactEnabled: true,
-      createdAt: new Date().toISOString()
-    };
+        const mockSession = {
+          ...basicSessionData,
+          participantCount: 0,
+          hostToken: 'temp-host-token',
+          inviteLink: '',
+          updatedAt: new Date().toISOString(),
+        } as any;
 
         setSession(mockSession);
       }
