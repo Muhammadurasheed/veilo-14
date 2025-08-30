@@ -4,64 +4,100 @@ const { nanoid } = require('nanoid');
 const sanctuaryInvitationSchema = new mongoose.Schema({
   id: {
     type: String,
-    default: () => `invite-${nanoid(12)}`,
+    default: () => `invitation-${nanoid(12)}`,
     unique: true,
     required: true
   },
   sessionId: {
     type: String,
     required: true,
-    ref: 'LiveSanctuarySession'
-  },
-  createdBy: {
-    type: String,
-    required: true // User shadow ID
+    index: true
   },
   inviteCode: {
     type: String,
-    default: () => nanoid(8).toLowerCase(),
+    default: () => nanoid(8),
     unique: true,
+    required: true,
+    index: true
+  },
+  inviteUrl: {
+    type: String,
     required: true
+  },
+  qrCodeUrl: {
+    type: String
+  },
+  createdBy: {
+    type: String,
+    required: true
+  },
+  creatorAlias: {
+    type: String,
+    required: true
+  },
+  sessionDetails: {
+    topic: String,
+    description: String,
+    emoji: String,
+    scheduledDateTime: Date,
+    estimatedDuration: Number,
+    maxParticipants: Number,
+    hostAlias: String
+  },
+  accessLevel: {
+    type: String,
+    enum: ['public', 'private', 'invite_only'],
+    default: 'invite_only'
   },
   maxUses: {
     type: Number,
-    default: null // null = unlimited
+    default: -1 // -1 means unlimited
   },
-  usedCount: {
+  currentUses: {
     type: Number,
     default: 0
   },
-  expiresAt: {
-    type: Date,
-    required: true
+  usageLog: [{
+    userId: String,
+    userAlias: String,
+    ipAddress: String,
+    userAgent: String,
+    usedAt: { type: Date, default: Date.now },
+    acknowledged: { type: Boolean, default: false },
+    acknowledgedAt: Date
+  }],
+  restrictions: {
+    requireAuthentication: { type: Boolean, default: false },
+    allowedDomains: [String],
+    blockedUsers: [String],
+    oneTimeUse: { type: Boolean, default: false }
+  },
+  settings: {
+    showSessionDetails: { type: Boolean, default: true },
+    requireAcknowledgment: { type: Boolean, default: true },
+    customWelcomeMessage: String,
+    autoJoin: { type: Boolean, default: false }
   },
   isActive: {
     type: Boolean,
     default: true
   },
-  metadata: {
-    sessionTopic: String,
-    hostAlias: String,
-    createdAt: { type: Date, default: Date.now }
+  deactivatedAt: Date,
+  deactivatedBy: String,
+  expiresAt: {
+    type: Date,
+    required: true,
+    index: { expireAfterSeconds: 0 }
   },
-  usageLog: [{
-    shadowId: String,
-    alias: String,
-    joinedAt: { type: Date, default: Date.now },
-    ipAddress: String
-  }],
-  restrictions: {
-    requiresApproval: { type: Boolean, default: false },
-    allowAnonymous: { type: Boolean, default: true },
-    maxParticipantsViaInvite: { type: Number, default: null }
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 
-// TTL index for auto-cleanup
-sanctuaryInvitationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
-// Compound index for efficient lookups
-sanctuaryInvitationSchema.index({ inviteCode: 1, isActive: 1 });
+// Compound indexes for efficient queries
 sanctuaryInvitationSchema.index({ sessionId: 1, isActive: 1 });
+sanctuaryInvitationSchema.index({ createdBy: 1, createdAt: -1 });
+sanctuaryInvitationSchema.index({ inviteCode: 1, isActive: 1 });
 
 module.exports = mongoose.model('SanctuaryInvitation', sanctuaryInvitationSchema);
