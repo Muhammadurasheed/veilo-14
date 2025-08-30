@@ -1,4 +1,4 @@
-// Universal socket service hook
+// Universal socket service hook - simple pass-through
 import socketService from '@/services/socket';
 
 export const useSocketService = () => {

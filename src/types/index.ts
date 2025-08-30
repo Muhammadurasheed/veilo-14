@@ -1,4 +1,4 @@
-// Re-export enhanced Expert type
+// Re-export enhanced Expert type - cleaned of duplicates
 export type { Expert } from './expert-final';
 
 // User-related types
@@ -98,155 +98,163 @@ export interface VerificationDocument {
 // Session-related types
 export interface Session {
   id: string;
-  expertId: string;
-  userId: string;
-  userAlias: string;
+  sessionId: string;
+  user1Id: string;
+  user2Id: string;
+  expertId?: string;
+  sessionType: 'chat' | 'voice' | 'video';
+  status: 'active' | 'ended' | 'cancelled' | 'requested' | 'scheduled' | 'completed' | 'canceled';
+  startTime: string;
+  endTime?: string;
   scheduledTime?: string;
-  status: "requested" | "scheduled" | "completed" | "canceled";
-  sessionType: "chat" | "video" | "voice";
+  rating?: number;
+  feedback?: string;
   notes?: string;
-  meetingUrl?: string;
-  createdAt: string;
 }
 
-// Sanctuary Session types
-export interface SanctuarySession {
+export interface Booking {
   id: string;
-  topic: string;
-  description?: string;
-  emoji?: string;
-  expiresAt: string;
-  participantCount: number;
-  isActive: boolean;
-  allowAnonymous?: boolean;
-  mode?: 'public' | 'private' | 'invite-only';
+  userId: string;
+  expertId: string;
+  sessionType: 'chat' | 'voice' | 'video';
+  scheduledDateTime: string;
+  duration: number;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  notes?: string;
 }
 
-export interface SanctuaryParticipant {
-  id: string;
-  alias: string;
-  joinedAt: string;
-  isAnonymous?: boolean;
-  isHost?: boolean;
-}
-
-// API request types
+// API Request types
 export interface ApiPostRequest {
   content: string;
   feeling?: string;
   topic?: string;
-  wantsExpertHelp?: boolean;
-  languageCode?: string;
+  wantsExpertHelp: boolean;
+  languageCode: string;
+  attachments?: PostAttachment[];
 }
 
 export interface ApiCommentRequest {
+  postId: string;
   content: string;
-  languageCode?: string;
+  languageCode: string;
 }
 
 export interface ApiExpertRegisterRequest {
   name: string;
   email: string;
+  phoneNumber?: string;
   specialization: string;
   bio: string;
-  pricingModel: "free" | "donation" | "fixed";
+  headline?: string;
+  location?: {
+    city?: string;
+    state?: string;
+    country?: string;
+    timezone?: string;
+  };
+  languages?: string[];
+  pricingModel: 'free' | 'donation' | 'fixed';
   pricingDetails?: string;
-  phoneNumber?: string;
+  hourlyRate?: number;
+  skills?: string[];
+  certifications?: string[];
+  workExperience?: Array<{
+    jobTitle: string;
+    company: string;
+    startDate: string;
+    endDate?: string;
+    isCurrent: boolean;
+    description?: string;
+    skills?: string[];
+  }>;
+  education?: Array<{
+    institution: string;
+    degree: string;
+    fieldOfStudy?: string;
+    startDate?: string;
+    endDate?: string;
+    grade?: string;
+  }>;
+  availability?: Array<{
+    day: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+    timeSlots: Array<{
+      start: string;
+      end: string;
+      available: boolean;
+    }>;
+  }>;
+  sessionPreferences?: {
+    voiceMasking: boolean;
+    allowRecording: boolean;
+    sessionTypes: {
+      chat: boolean;
+      voice: boolean;
+      video: boolean;
+    };
+    minDuration: number;
+    maxDuration: number;
+  };
+  socialLinks?: {
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+    instagram?: string;
+  };
+  yearsOfExperience?: number;
 }
 
 export interface ApiChatSessionRequest {
-  expertId: string;
-  initialMessage?: string;
-  sessionType: "chat" | "video" | "voice";
-  scheduledTime?: string;
+  recipientId: string;
+  sessionType: 'chat' | 'voice' | 'video';
 }
 
-export interface ApiVerificationRequest {
-  verificationLevel: "blue" | "gold" | "platinum" | "none";
-  status: "approved" | "rejected";
-  feedback?: string;
-}
-
-// Sanctuary API request types
 export interface ApiSanctuaryCreateRequest {
   topic: string;
   description?: string;
   emoji?: string;
-  expireHours?: number;
-  allowAnonymous?: boolean;
-}
-
-export interface ApiSanctuaryJoinRequest {
-  alias?: string;
-  isAnonymous?: boolean;
-}
-
-// API response type
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-// Gemini API request types
-export interface ApiGeminiModerateRequest {
-  content: string;
-}
-
-export interface ApiGeminiImproveRequest {
-  content: string;
-}
-
-export interface ApiGeminiModerateImageRequest {
-  imageUrl: string;
-}
-
-// Post form data type
-export interface PostFormData {
-  content: string;
-  feeling?: string;
-  topic?: string;
-  wantsExpertHelp?: boolean;
-}
-
-// Live Sanctuary types
-export interface CreateLiveSanctuaryRequest {
-  topic: string;
-  title?: string;
-  description?: string;
-  emoji?: string;
   maxParticipants?: number;
-  audioOnly?: boolean;
-  allowAnonymous?: boolean;
-  moderationEnabled?: boolean;
-  emergencyContactEnabled?: boolean;
-  expireHours?: number;
-  scheduledDateTime?: string;
-  estimatedDuration?: number;
-  tags?: string[];
-  language?: string;
-  moderationLevel?: string;
-}
-
-export interface LiveSanctuarySession {
-  id: string;
-  topic: string;
-  description?: string;
-  emoji?: string;
-  hostId: string;
-  hostAlias?: string;
-  participants: LiveSanctuaryParticipant[];
-  participantCount: number;
-  maxParticipants: number;
   audioOnly: boolean;
   allowAnonymous: boolean;
   moderationEnabled: boolean;
   emergencyContactEnabled: boolean;
-  status: 'scheduled' | 'active' | 'ended';
+  expireHours: number;
+}
+
+export interface ApiSanctuaryJoinRequest {
+  participantAlias: string;
+  isAnonymous?: boolean;
+}
+
+// Live Sanctuary types
+export interface CreateLiveSanctuaryRequest {
+  title: string;
+  description?: string;
+  tags?: string[];
+  maxParticipants?: number;
+  isScheduled?: boolean;
   scheduledDateTime?: string;
-  startedAt?: string;
-  endedAt?: string;
+  estimatedDuration?: number;
+  isPrivate?: boolean;
+  requireApproval?: boolean;
+  emergencyProtocols?: boolean;
+  aiMonitoring?: boolean;
+  recordingConsent?: boolean;
+  language?: string;
+}
+
+export interface LiveSanctuarySession {
+  id: string;
+  title: string;
+  topic?: string; // backward compatibility  
+  emoji?: string; // backward compatibility
+  description?: string;
+  hostId: string;
+  hostAlias: string;
+  participants: LiveSanctuaryParticipant[];
+  maxParticipants: number;
+  status: 'waiting' | 'active' | 'ended';
+  isScheduled?: boolean;
+  scheduledDateTime?: string;
   estimatedDuration?: number;
   tags?: string[];
   language?: string;
@@ -268,6 +276,11 @@ export interface LiveSanctuarySession {
   isRecorded?: boolean;
   aiMonitoring?: boolean;
   emergencyProtocols?: boolean;
+}
+
+// Main Sanctuary Session type (backwards compatible)
+export interface SanctuarySession extends LiveSanctuarySession {
+  // All LiveSanctuarySession properties included via extension
 }
 
 export interface LiveSanctuaryParticipant {
@@ -317,4 +330,13 @@ export interface LiveSanctuaryInvitation {
   status: 'pending' | 'accepted' | 'declined' | 'expired';
   createdAt: string;
   expiresAt: string;
+}
+
+// Gemini API types
+export interface ApiGeminiModerateRequest {
+  content: string;
+}
+
+export interface ApiGeminiImproveRequest {
+  content: string;
 }
