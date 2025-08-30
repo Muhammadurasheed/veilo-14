@@ -58,7 +58,9 @@ export interface SessionRecording {
   isActive: boolean;
 }
 
-export interface LiveSanctuarySession {
+// Use the LiveSanctuarySession from types/index.ts to avoid conflicts
+// This interface extends the base one with sanctuary-specific properties
+export interface ExtendedLiveSanctuarySession {
   id: string;
   topic: string;
   description?: string;
@@ -106,7 +108,7 @@ export interface LiveParticipant {
   connectionStatus?: 'connected' | 'connecting' | 'disconnected';
   handRaised?: boolean;
   speakingTime?: number;
-  reactions: EmojiReaction[];
+  reactions?: EmojiReaction[];
 }
 
 export interface EmojiReaction {
@@ -117,9 +119,5 @@ export interface EmojiReaction {
   duration?: number;
 }
 
-// Socket service interface for real-time features
-export interface SocketService {
-  on(event: string, callback: Function): void;
-  emit(event: string, data?: any): void;
-  disconnect(): void;
-}
+// Re-export LiveSanctuarySession from types/index.ts for compatibility
+export { LiveSanctuarySession } from '@/types/index';

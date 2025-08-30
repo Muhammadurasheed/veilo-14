@@ -174,7 +174,7 @@ const apiRequest = async <T = any>(
 
 // User API methods
 const UserApi = {
-  // Register new user with secure identity system
+  // User API register with enhanced types
   async register(userData: { 
     alias?: string; 
     avatarIndex?: number; 
@@ -658,6 +658,17 @@ const LiveSanctuaryApi = {
       participantId, 
       hostToken 
     });
+  },
+
+  async getSubmissions(sessionId: string, hostToken?: string) {
+    const headers: Record<string, string> = {};
+    if (hostToken) {
+      headers['x-host-token'] = hostToken;
+    }
+    return apiRequest('GET', `/api/live-sanctuary/${sessionId}/submissions`, null, { 
+      headers,
+      params: hostToken ? { hostToken } : {}
+    });
   }
 };
 
@@ -719,10 +730,10 @@ const AppealApi = {
   }
 };
 
-// Export main API instances
+// Export main API instances  
 export { ExpertApi, SanctuaryApi, LiveSanctuaryApi, PostApi, SessionApi, GeminiApi, AppealApi, UserApi, AdminApi, AnalyticsApi, apiRequest };
 
-// Export only type reference
+// Export type reference
 export type { ApiResponse } from '@/types';
 
 export default api;
