@@ -27,7 +27,7 @@ import { FileUpload } from '@/components/expert/FileUpload';
 import { Calendar, Check, ChevronRight, Shield, Upload, MessageSquare, Video, Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { ExpertApi, UserApi } from '@/services/api';
+import { VeiloApi } from '@/services/api';
 import { useUserContext } from '@/contexts/UserContext';
 import { ApiExpertRegisterRequest } from '@/types';
 
@@ -94,7 +94,7 @@ const BeaconRegistration = () => {
 
     try {
       // Step 1: Register the expert account (creates new user)
-      const registerResponse = await UserApi.registerExpertAccount(values);
+      const registerResponse = await VeiloApi.Auth.register(values);
       console.log('Expert account registration response:', registerResponse);
       
       if (!registerResponse.success || !registerResponse.data) {
@@ -161,7 +161,7 @@ const BeaconRegistration = () => {
       };
       
       console.log('Sending expert data to API:', expertData);
-      const expertResponse = await ExpertApi.registerExpert(expertData);
+      const expertResponse = await VeiloApi.Expert.register(expertData);
       console.log('Expert registration response:', expertResponse);
       
       if (expertResponse.success && expertResponse.data) {
@@ -207,7 +207,7 @@ const BeaconRegistration = () => {
       
       // If we have an expert ID, actually upload the document
       if (expertId) {
-        const uploadResponse = await ExpertApi.uploadVerificationDocument(
+        const uploadResponse = await VeiloApi.Expert.uploadDocument(
           expertId, 
           file, 
           type, 

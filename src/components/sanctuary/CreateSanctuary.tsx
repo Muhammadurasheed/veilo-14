@@ -116,7 +116,7 @@ const CreateSanctuary: React.FC = () => {
           expireHours: values.expireHours
         };
         
-        const response = await SanctuaryApi.createSession(sanctuaryData);
+        const response = await SanctuaryApi.create(sanctuaryData);
         
         if (response.success && response.data) {
           // Store host token in localStorage with expiry if this is an anonymous host
@@ -161,7 +161,7 @@ const CreateSanctuary: React.FC = () => {
           scheduledAt: values.scheduledTime
         };
         
-        const response = await LiveSanctuaryApi.createSession(liveSanctuaryData);
+        const response = await LiveSanctuaryApi.create(liveSanctuaryData);
         
         if (response.success && response.data) {
           // Store host token for anonymous hosts with expiry

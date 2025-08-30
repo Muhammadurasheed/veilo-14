@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AdminApi } from '@/services/api';
+import { VeiloApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,7 +50,7 @@ const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
     try {
       console.log('🔐 Attempting admin login with:', { email: values.email, hasPassword: !!values.password });
       
-      const response = await AdminApi.login({
+      const response = await VeiloApi.Auth.adminLogin({
         email: values.email,
         password: values.password
       });

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
-import { AnalyticsApi } from '@/services/api';
+import { VeiloApi } from '@/services/api';
 import { useToast } from '@/hooks/use-toast';
 import { 
   TrendingUp, 
@@ -54,7 +54,7 @@ const ExpertAnalytics = ({ expertId }: ExpertAnalyticsProps) => {
   const fetchExpertAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await AnalyticsApi.getExpertAnalytics(expertId!, timeframe);
+      const response = await VeiloApi.Admin.getExpertPerformance();
       if (response.success) {
         setAnalytics(response.data);
       }
@@ -72,7 +72,7 @@ const ExpertAnalytics = ({ expertId }: ExpertAnalyticsProps) => {
   const fetchRankings = async () => {
     try {
       setLoading(true);
-      const response = await AnalyticsApi.getExpertRankings(sortBy, 20);
+      const response = await VeiloApi.Admin.getExpertPerformance();
       if (response.success) {
         setRankings(response.data);
       }
