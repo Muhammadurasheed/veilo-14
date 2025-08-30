@@ -2,63 +2,110 @@ const Redis = require('ioredis');
 
 class RedisService {
   constructor() {
-    // Enhanced Redis configuration for Redis Cloud with TLS
-    const redisConfig = {
-      host: process.env.REDIS_HOST || 'redis-13335.c93.us-east-1-3.ec2.redns.redis-cloud.com',
-      port: parseInt(process.env.REDIS_PORT) || 13335,
-      username: process.env.REDIS_USERNAME || 'default',
-      password: process.env.REDIS_PASSWORD,
-      
-      // TLS Configuration for Redis Cloud
-      tls: {
-        rejectUnauthorized: false // Redis Cloud uses self-signed certificates
-      },
-      
-      // Connection and retry settings
+    // Prefer REDIS_URL when provided (supports rediss:// for TLS)
+    const redisUrl = process.env.REDIS_URL;
+
+    // Base connection options
+    const baseOptions = {
       connectTimeout: 10000,
       lazyConnect: true,
       maxRetriesPerRequest: 5,
       retryDelayOnFailover: 1000,
       retryConnectOnFailover: true,
-      
+      showFriendlyErrorStack: process.env.NODE_ENV !== 'production',
+
       // Retry strategy
       retryStrategy: (times) => {
         const delay = Math.min(times * 200, 5000);
         console.log(`🔄 Redis reconnection attempt ${times}, retrying in ${delay}ms`);
         return delay;
       },
-      
+
       // Reconnect on error
       reconnectOnError: (err) => {
         console.log('🔄 Redis reconnectOnError:', err.message);
-        return err.message.includes('READONLY') || err.message.includes('ECONNRESET');
+        return (
+          err.message.includes('READONLY') ||
+          err.message.includes('ECONNRESET') ||
+          err.message.includes('ETIMEDOUT')
+        );
       }
     };
 
-    // Create Redis instances with enhanced config
-    this.client = new Redis(redisConfig);
-    this.publisher = new Redis({ ...redisConfig, db: 0 });
-    this.subscriber = new Redis({ ...redisConfig, db: 0 });
+    if (redisUrl) {
+      // If a full URL is provided, use it directly and enable TLS when using rediss://
+      try {
+        const url = new URL(redisUrl);
+        const isTLS = url.protocol === 'rediss:';
+        if (isTLS) {
+          baseOptions.tls = {
+            // Redis Cloud requires TLS with SNI
+            rejectUnauthorized: false,
+            servername: url.hostname
+          };
+        }
+
+        // Create Redis instances using URL
+        this.client = new Redis(redisUrl, baseOptions);
+        this.publisher = new Redis(redisUrl, { ...baseOptions, db: 0 });
+        this.subscriber = new Redis(redisUrl, { ...baseOptions, db: 0 });
+
+        console.log(`🔧 Redis configured via REDIS_URL (${isTLS ? 'TLS enabled' : 'no TLS'}) host=${url.hostname} port=${url.port}`);
+      } catch (e) {
+        console.error('❌ Invalid REDIS_URL, falling back to host/port config:', e.message);
+      }
+    }
+
+    // Fallback to host/port if URL not provided or invalid
+    if (!this.client) {
+      const redisConfig = {
+        host: process.env.REDIS_HOST || '127.0.0.1',
+        port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+        username: process.env.REDIS_USERNAME,
+        password: process.env.REDIS_PASSWORD,
+        ...baseOptions,
+        // Enable TLS if explicitly requested
+        ...(process.env.REDIS_TLS === 'true' && {
+          tls: {
+            rejectUnauthorized: false,
+            servername: process.env.REDIS_HOST
+          }
+        })
+      };
+
+      // Create Redis instances with enhanced config
+      this.client = new Redis(redisConfig);
+      this.publisher = new Redis({ ...redisConfig, db: 0 });
+      this.subscriber = new Redis({ ...redisConfig, db: 0 });
+
+      console.log(`🔧 Redis configured via host/port host=${redisConfig.host} port=${redisConfig.port} tls=${!!redisConfig.tls}`);
+    }
 
     this.isConnected = false;
     this.setupEventHandlers();
   }
 
   setupEventHandlers() {
-    this.client.on('connect', () => {
-      console.log('✅ Redis connected');
-      this.isConnected = true;
-    });
+    const attach = (instance, name) => {
+      instance.on('connect', () => {
+        console.log(`✅ Redis ${name} connected`);
+        if (name === 'client') this.isConnected = true;
+      });
 
-    this.client.on('error', (err) => {
-      console.error('❌ Redis connection error:', err);
-      this.isConnected = false;
-    });
+      instance.on('error', (err) => {
+        console.error(`❌ Redis ${name} connection error:`, err);
+        if (name === 'client') this.isConnected = false;
+      });
 
-    this.client.on('close', () => {
-      console.log('🔴 Redis connection closed');
-      this.isConnected = false;
-    });
+      instance.on('close', () => {
+        console.log(`🔴 Redis ${name} connection closed`);
+        if (name === 'client') this.isConnected = false;
+      });
+    };
+
+    attach(this.client, 'client');
+    attach(this.publisher, 'publisher');
+    attach(this.subscriber, 'subscriber');
   }
 
   async connect() {
