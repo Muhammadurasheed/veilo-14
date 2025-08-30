@@ -9,6 +9,11 @@ const { instrument } = require('@socket.io/admin-ui');
 
 dotenv.config();
 
+// Import flagship services
+const redisService = require('./services/redisService');
+const elevenLabsService = require('./services/elevenLabsService');
+const aiModerationService = require('./services/aiModerationService');
+
 const responseHandler = require('./middleware/responseHandler');
 
 const app = express();
@@ -59,6 +64,14 @@ mongoose.connect(dbUrl, {
 .then(async () => {
   console.log('✅ MongoDB connected');
   
+  // Initialize flagship services
+  if (process.env.REDIS_ENABLED === 'true') {
+    await redisService.connect();
+  }
+  
+  // Initialize AI moderation service
+  await aiModerationService.initialize();
+  
   // Auto-setup platform data on first run
   try {
     const setupPlatformData = require('./scripts/setupPlatformData');
@@ -84,6 +97,7 @@ const postRoutes = require('./routes/postRoutes');
 const aiRoutes = require('./routes/aiRoutes');
 const sanctuaryRoutes = require('./routes/sanctuaryRoutes');
 const liveSanctuaryRoutes = require('./routes/liveSanctuaryRoutes');
+const enhancedLiveSanctuaryRoutes = require('./routes/enhancedLiveSanctuaryRoutes');
 const sanctuaryInvitationRoutes = require('./routes/sanctuaryInvitationRoutes');
 const sanctuaryChatRoutes = require('./routes/sanctuaryChatRoutes');
 const chatRoutes = require('./routes/chatRoutes');
@@ -113,6 +127,7 @@ app.use('/api/live-sanctuary', (req, res, next) => {
   next();
 });
 app.use('/api/live-sanctuary', liveSanctuaryRoutes);
+app.use('/api/flagship-sanctuary', enhancedLiveSanctuaryRoutes);
 app.use('/api/sanctuary-invitations', sanctuaryInvitationRoutes);
 app.use('/api/sanctuary-chat', sanctuaryChatRoutes);
 app.use('/api/bookings', bookingRoutes);
